@@ -27,6 +27,20 @@
     padding:0 0 3rem;
   }
   .wrap{max-width:520px;margin:0 auto;padding:1.5rem 1.25rem;}
+  #app-view.wrap{max-width:1200px;}
+
+  .dashboard{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:1.5rem;
+    align-items:start;
+  }
+  .dashboard .card{margin-bottom:0;}
+  .dashboard .span-2{grid-column:1 / -1;}
+
+  @media (max-width:860px){
+    .dashboard{grid-template-columns:1fr;}
+  }
 
   h1{
     font-family:'Lora',serif;
@@ -109,7 +123,16 @@
     font-family:inherit;
   }
   .submit:active{background:var(--teal-dark);}
+  .submit.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);}
   .error{color:var(--danger);font-size:13px;margin-top:6px;display:none;}
+  .info{color:var(--teal-dark);font-size:13px;margin-top:6px;display:none;}
+
+  .divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--muted);font-size:12px;}
+  .divider::before, .divider::after{content:'';flex:1;height:1px;background:var(--line);}
+
+  .link-row{display:flex;justify-content:space-between;margin-top:14px;}
+  .link-btn{background:none;border:none;color:var(--teal-dark);font-size:13px;cursor:pointer;font-family:inherit;padding:0;}
+  .link-btn:hover{text-decoration:underline;}
 
   .cat-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px;}
   .cat-row .name{width:88px;flex-shrink:0;color:var(--muted);}
@@ -149,10 +172,26 @@
   .person-card .prow .pval{font-variant-numeric:tabular-nums;font-weight:500;}
 
   .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:1rem;}
+
+  .table-filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;align-items:flex-end;}
+  .table-filters .field{display:flex;flex-direction:column;gap:4px;}
+  .table-filters label{margin:0;}
+  .table-filters select, .table-filters input{width:auto;min-width:120px;}
+  .export-btn{margin-top:0 !important;width:auto !important;padding:9px 16px !important;margin-left:auto;}
+
+  .table-wrap{overflow-x:auto;}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table th, .data-table td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .data-table th{cursor:pointer;color:var(--muted);font-weight:600;user-select:none;}
+  .data-table th.sorted{color:var(--ink);}
+  .data-table td.amt{text-align:right;font-variant-numeric:tabular-nums;}
+  .data-table .kind-expense{color:var(--danger);}
+  .data-table .kind-savings{color:var(--teal-dark);}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="wrap" id="login-view">
@@ -161,6 +200,34 @@
   <div class="card">
     <div class="error" id="login-error">That Google account isn't allowed to use this ledger.</div>
     <button class="submit" id="login-btn">Sign in with Google</button>
+
+    <div class="divider"><span>or</span></div>
+
+    <label for="email-input">Email</label>
+    <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
+
+    <label for="password-input">Password</label>
+    <input type="password" id="password-input" placeholder="••••••••" autocomplete="current-password">
+
+    <div class="error" id="email-error"></div>
+    <div class="info" id="email-info"></div>
+
+    <button class="submit secondary" id="email-submit-btn">Sign in</button>
+
+    <div class="link-row">
+      <button type="button" class="link-btn" id="toggle-mode-btn">Create an account</button>
+      <button type="button" class="link-btn" id="forgot-btn">Forgot password?</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="verify-view" style="display:none;">
+  <h1>Our ledger</h1>
+  <div class="card">
+    <p class="sub" style="margin-bottom:1rem;">Verify your email to continue. Check your inbox for a link, then reload this page.</p>
+    <button class="submit" id="resend-verify-btn">Resend verification email</button>
+    <div class="info" id="verify-info"></div>
+    <button class="submit secondary" id="verify-logout-btn" style="margin-top:10px;">Sign out</button>
   </div>
 </div>
 
@@ -190,90 +257,146 @@
     </div>
   </div>
 
-  <div class="card">
-    <h2>Add an expense</h2>
-    <label for="amount">Amount (₹)</label>
-    <input type="number" id="amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
+  <div class="dashboard">
+    <div class="card">
+      <h2>Add an expense</h2>
+      <label for="amount">Amount (₹)</label>
+      <input type="number" id="amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
 
-    <label for="category">Category</label>
-    <select id="category"></select>
+      <label for="category">Category</label>
+      <select id="category"></select>
 
-    <label for="paytype">Paid via</label>
-    <select id="paytype"></select>
+      <label for="paytype">Paid via</label>
+      <select id="paytype"></select>
 
-    <label for="note">Note (optional)</label>
-    <input type="text" id="note" placeholder="Milk, vegetables">
+      <label for="note">Note (optional)</label>
+      <input type="text" id="note" placeholder="Milk, vegetables">
 
-    <label>Added by</label>
-    <div class="who" id="exp-who">
-      <button type="button" class="active" data-who="Sugun">Sugun</button>
-      <button type="button" data-who="Sreelu">Sreelu</button>
-    </div>
+      <label for="date">Date</label>
+      <input type="date" id="date">
 
-    <div class="error" id="error-msg">Enter an amount first.</div>
-    <button class="submit" id="add-btn">Add expense</button>
-  </div>
-
-  <div class="card">
-    <h2>Add savings</h2>
-    <label for="save-amount">Amount (₹)</label>
-    <input type="number" id="save-amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
-
-    <label for="save-category">Category</label>
-    <select id="save-category"></select>
-
-    <label for="save-note">Note (optional)</label>
-    <input type="text" id="save-note" placeholder="Fixed deposit, RD">
-
-    <label>Added by</label>
-    <div class="who" id="save-who">
-      <button type="button" class="active" data-who="Sugun">Sugun</button>
-      <button type="button" data-who="Sreelu">Sreelu</button>
-    </div>
-
-    <div class="error" id="save-error-msg">Enter an amount first.</div>
-    <button class="submit" id="save-add-btn">Add savings</button>
-  </div>
-
-  <div class="card">
-    <h2>Savings dashboard</h2>
-    <div class="stats" style="margin-bottom:1rem;">
-      <div class="stat">
-        <div class="label">Total saved</div>
-        <div class="num" id="save-total">₹0</div>
+      <label>Added by</label>
+      <div class="who" id="exp-who">
+        <button type="button" class="active" data-who="Sugun">Sugun</button>
+        <button type="button" data-who="Sreelu">Sreelu</button>
       </div>
-      <div class="stat">
-        <div class="label">This month</div>
-        <div class="num" id="save-month-total">₹0</div>
+
+      <div class="error" id="error-msg">Enter an amount first.</div>
+      <button class="submit" id="add-btn">Add expense</button>
+    </div>
+
+    <div class="card">
+      <h2>Add savings</h2>
+      <label for="save-amount">Amount (₹)</label>
+      <input type="number" id="save-amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
+
+      <label for="save-category">Category</label>
+      <select id="save-category"></select>
+
+      <label for="save-note">Note (optional)</label>
+      <input type="text" id="save-note" placeholder="Fixed deposit, RD">
+
+      <label for="save-date">Date</label>
+      <input type="date" id="save-date">
+
+      <label>Added by</label>
+      <div class="who" id="save-who">
+        <button type="button" class="active" data-who="Sugun">Sugun</button>
+        <button type="button" data-who="Sreelu">Sreelu</button>
+      </div>
+
+      <div class="error" id="save-error-msg">Enter an amount first.</div>
+      <button class="submit" id="save-add-btn">Add savings</button>
+    </div>
+
+    <div class="card">
+      <h2>Top 5 categories</h2>
+      <div id="cat-breakdown"><div class="empty">No entries yet.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>By payment type</h2>
+      <div id="pay-breakdown"><div class="empty">No entries yet.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>By person</h2>
+      <div id="person-breakdown"></div>
+    </div>
+
+    <div class="card">
+      <h2>Last 8 weeks</h2>
+      <div class="weeks" id="weeks-chart"></div>
+    </div>
+
+    <div class="card span-2">
+      <h2>Savings dashboard</h2>
+      <div class="stats" style="margin-bottom:1rem;">
+        <div class="stat">
+          <div class="label">Total saved</div>
+          <div class="num" id="save-total">₹0</div>
+        </div>
+        <div class="stat">
+          <div class="label">This month</div>
+          <div class="num" id="save-month-total">₹0</div>
+        </div>
+      </div>
+      <div class="weeks" id="save-weeks-chart"></div>
+      <div style="margin-top:1rem;" id="save-cat-breakdown"></div>
+    </div>
+
+    <div class="card span-2">
+      <h2>Recent entries</h2>
+      <div id="entries-list"><div class="empty">Nothing logged yet. Add your first expense above.</div></div>
+    </div>
+
+    <div class="card span-2">
+      <h2>All entries</h2>
+      <div class="table-filters">
+        <div class="field">
+          <label for="filter-type">Type</label>
+          <select id="filter-type">
+            <option value="all">All</option>
+            <option value="expense">Expenses</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-who">Person</label>
+          <select id="filter-who"><option value="all">All</option></select>
+        </div>
+        <div class="field">
+          <label for="filter-category">Category</label>
+          <select id="filter-category"><option value="all">All</option></select>
+        </div>
+        <div class="field">
+          <label for="filter-from">From</label>
+          <input type="date" id="filter-from">
+        </div>
+        <div class="field">
+          <label for="filter-to">To</label>
+          <input type="date" id="filter-to">
+        </div>
+        <button class="submit export-btn" id="export-btn">Export to Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="entries-table">
+          <thead>
+            <tr>
+              <th data-col="date">Date</th>
+              <th data-col="kind">Type</th>
+              <th data-col="category">Category</th>
+              <th data-col="who">Who</th>
+              <th>Detail</th>
+              <th data-col="amount">Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="entries-table-body"></tbody>
+        </table>
+        <div class="empty" id="table-empty" style="display:none;">No entries match these filters.</div>
       </div>
     </div>
-    <div class="weeks" id="save-weeks-chart"></div>
-    <div style="margin-top:1rem;" id="save-cat-breakdown"></div>
-  </div>
-
-  <div class="card">
-    <h2>By person</h2>
-    <div id="person-breakdown"></div>
-  </div>
-
-  <div class="card">
-    <h2>Top 5 categories</h2>
-    <div id="cat-breakdown"><div class="empty">No entries yet.</div></div>
-  </div>
-
-  <div class="card">
-    <h2>By payment type</h2>
-    <div id="pay-breakdown"><div class="empty">No entries yet.</div></div>
-  </div>
-
-  <div class="card">
-    <h2>Last 8 weeks</h2>
-    <div class="weeks" id="weeks-chart"></div>
-  </div>
-
-  <div class="card">
-    <h2>Recent entries</h2>
-    <div id="entries-list"><div class="empty">Nothing logged yet. Add your first expense above.</div></div>
   </div>
 
   <p class="footer-note">Data is stored in your own Firebase project and syncs live between devices.</p>
@@ -292,6 +415,14 @@ const ADD_NEW = '__add_new__';
 function fmt(n){
   return '\u20B9' + Number(n).toLocaleString('en-IN', {maximumFractionDigits:0});
 }
+
+function todayStr(){
+  const d = new Date();
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0,10);
+}
+document.getElementById('date').value = todayStr();
+document.getElementById('save-date').value = todayStr();
 
 function startOfWeek(d){
   const dt = new Date(d);
@@ -335,13 +466,15 @@ function initFirebase(){
   auth = firebase.auth();
 
   auth.onAuthStateChanged(user => {
-    if(user){
-      document.getElementById('login-view').style.display = 'none';
-      document.getElementById('app-view').style.display = 'block';
+    const isUnverifiedPassword = user && !user.emailVerified &&
+      user.providerData.some(p => p.providerId === 'password');
+
+    document.getElementById('login-view').style.display = (user) ? 'none' : 'block';
+    document.getElementById('verify-view').style.display = isUnverifiedPassword ? 'block' : 'none';
+    document.getElementById('app-view').style.display = (user && !isUnverifiedPassword) ? 'block' : 'none';
+
+    if(user && !isUnverifiedPassword){
       attachListeners();
-    } else {
-      document.getElementById('login-view').style.display = 'block';
-      document.getElementById('app-view').style.display = 'none';
     }
   });
 }
@@ -383,6 +516,97 @@ document.getElementById('login-btn').addEventListener('click', () => {
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   auth.signOut();
+});
+
+document.getElementById('verify-logout-btn').addEventListener('click', () => {
+  auth.signOut();
+});
+
+document.getElementById('resend-verify-btn').addEventListener('click', () => {
+  const infoEl = document.getElementById('verify-info');
+  auth.currentUser.sendEmailVerification()
+    .then(() => {
+      infoEl.textContent = 'Verification email sent. Check your inbox.';
+      infoEl.style.display = 'block';
+    })
+    .catch(err => {
+      infoEl.textContent = err.message;
+      infoEl.style.display = 'block';
+    });
+});
+
+let authMode = 'signin';
+
+function authErrorMessage(err){
+  switch(err.code){
+    case 'auth/invalid-email': return 'Enter a valid email address.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': return 'Incorrect email or password.';
+    case 'auth/email-already-in-use': return 'An account with this email already exists. Try signing in instead.';
+    case 'auth/weak-password': return 'Password should be at least 6 characters.';
+    case 'auth/missing-password': return 'Enter a password.';
+    default: return err.message;
+  }
+}
+
+function setEmailError(msg){
+  const el = document.getElementById('email-error');
+  document.getElementById('email-info').style.display = 'none';
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function setEmailInfo(msg){
+  const el = document.getElementById('email-info');
+  document.getElementById('email-error').style.display = 'none';
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+document.getElementById('toggle-mode-btn').addEventListener('click', () => {
+  authMode = authMode === 'signin' ? 'register' : 'signin';
+  document.getElementById('email-submit-btn').textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
+  document.getElementById('toggle-mode-btn').textContent = authMode === 'signin' ? 'Create an account' : 'Already have an account? Sign in';
+  setEmailError('');
+  setEmailInfo('');
+});
+
+document.getElementById('forgot-btn').addEventListener('click', () => {
+  const email = document.getElementById('email-input').value.trim();
+  if(!email){
+    setEmailError('Enter your email above first.');
+    return;
+  }
+  auth.sendPasswordResetEmail(email)
+    .then(() => setEmailInfo('Password reset email sent. Check your inbox.'))
+    .catch(err => setEmailError(authErrorMessage(err)));
+});
+
+document.getElementById('email-submit-btn').addEventListener('click', () => {
+  const email = document.getElementById('email-input').value.trim();
+  const password = document.getElementById('password-input').value;
+  setEmailError('');
+  setEmailInfo('');
+
+  if(!email || !password){
+    setEmailError('Enter both email and password.');
+    return;
+  }
+
+  if(authMode === 'signin'){
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err => setEmailError(authErrorMessage(err)));
+  } else {
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(cred => cred.user.sendEmailVerification())
+      .then(() => auth.signOut())
+      .then(() => {
+        document.getElementById('toggle-mode-btn').click();
+        setEmailInfo('Account created. Check your email to verify, then sign in.');
+      })
+      .catch(err => setEmailError(authErrorMessage(err)));
+  }
 });
 
 async function save(){
@@ -579,7 +803,144 @@ function render(){
       });
     });
   }
+
+  renderTable();
 }
+
+let tableSort = { col: 'date', dir: 'desc' };
+
+function buildAllEntries(){
+  const exp = expenses.map(e => ({
+    id: e.id, date: e.date, kind: 'expense', category: e.category,
+    amount: e.amount, who: e.who, detail: (e.type || '') + (e.note ? ' — ' + e.note : '')
+  }));
+  const sav = savings.map(e => ({
+    id: e.id, date: e.date, kind: 'savings', category: e.category,
+    amount: e.amount, who: e.who, detail: e.note || ''
+  }));
+  return exp.concat(sav);
+}
+
+function populateTableFilterOptions(){
+  const whoSel = document.getElementById('filter-who');
+  const catSel = document.getElementById('filter-category');
+  const currentWhoF = whoSel.value || 'all';
+  const currentCatF = catSel.value || 'all';
+
+  const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who)]));
+  whoSel.innerHTML = '<option value="all">All</option>' + people.map(p => `<option value="${p}">${p}</option>`).join('');
+  if(people.includes(currentWhoF)) whoSel.value = currentWhoF;
+
+  const typeF = document.getElementById('filter-type').value;
+  const cats = new Set();
+  if(typeF !== 'savings') expenses.forEach(e => cats.add(e.category));
+  if(typeF !== 'expense') savings.forEach(e => cats.add(e.category));
+  const catList = Array.from(cats);
+  catSel.innerHTML = '<option value="all">All</option>' + catList.map(c => `<option value="${c}">${c}</option>`).join('');
+  if(catList.includes(currentCatF)) catSel.value = currentCatF;
+}
+
+function getFilteredSortedEntries(){
+  const typeF = document.getElementById('filter-type').value;
+  const whoF = document.getElementById('filter-who').value;
+  const catF = document.getElementById('filter-category').value;
+  const fromF = document.getElementById('filter-from').value;
+  const toF = document.getElementById('filter-to').value;
+
+  let rows = buildAllEntries();
+  if(typeF !== 'all') rows = rows.filter(r => r.kind === typeF);
+  if(whoF !== 'all') rows = rows.filter(r => r.who === whoF);
+  if(catF !== 'all') rows = rows.filter(r => r.category === catF);
+  if(fromF) rows = rows.filter(r => r.date.slice(0,10) >= fromF);
+  if(toF) rows = rows.filter(r => r.date.slice(0,10) <= toF);
+
+  const dir = tableSort.dir === 'asc' ? 1 : -1;
+  rows.sort((a,b) => {
+    if(tableSort.col === 'amount') return (a.amount - b.amount) * dir;
+    return String(a[tableSort.col]).localeCompare(String(b[tableSort.col])) * dir;
+  });
+  return rows;
+}
+
+function renderTable(){
+  populateTableFilterOptions();
+  const rows = getFilteredSortedEntries();
+  const tbody = document.getElementById('entries-table-body');
+  const emptyEl = document.getElementById('table-empty');
+
+  const colLabels = { date:'Date', kind:'Type', category:'Category', who:'Who', amount:'Amount' };
+  document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
+    const col = th.dataset.col;
+    th.classList.toggle('sorted', col === tableSort.col);
+    th.textContent = colLabels[col] + (col === tableSort.col ? (tableSort.dir === 'asc' ? ' ▲' : ' ▼') : '');
+  });
+
+  if(rows.length === 0){
+    tbody.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</td>
+      <td class="kind-${r.kind}">${r.kind === 'expense' ? 'Expense' : 'Saving'}</td>
+      <td>${r.category}</td>
+      <td>${r.who}</td>
+      <td>${r.detail}</td>
+      <td class="amt">${fmt(r.amount)}</td>
+      <td><button class="del" data-id="${r.id}" data-kind="${r.kind}" aria-label="Delete entry">Delete</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      if(btn.dataset.kind === 'expense'){
+        expenses = expenses.filter(e => e.id !== id);
+        await save();
+      } else {
+        savings = savings.filter(e => e.id !== id);
+        await saveSavings();
+      }
+      render();
+    });
+  });
+}
+
+document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if(tableSort.col === col){
+      tableSort.dir = tableSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      tableSort.col = col;
+      tableSort.dir = col === 'amount' ? 'desc' : 'asc';
+    }
+    renderTable();
+  });
+});
+
+['filter-type','filter-who','filter-category','filter-from','filter-to'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const rows = getFilteredSortedEntries();
+  const data = rows.map(r => ({
+    Date: new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}),
+    Type: r.kind === 'expense' ? 'Expense' : 'Saving',
+    Category: r.category,
+    Who: r.who,
+    Detail: r.detail,
+    Amount: r.amount
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Entries');
+  XLSX.writeFile(wb, 'our-ledger-' + todayStr() + '.xlsx');
+});
 
 document.getElementById('category').addEventListener('change', async (e) => {
   if(e.target.value === ADD_NEW){
@@ -647,10 +1008,11 @@ document.getElementById('save-add-btn').addEventListener('click', async () => {
 
   const note = document.getElementById('save-note').value.trim();
   const category = document.getElementById('save-category').value;
+  const dateVal = document.getElementById('save-date').value || todayStr();
   const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     amount, category, note, who: currentSaveWho,
-    date: new Date().toISOString()
+    date: new Date(dateVal + 'T12:00:00').toISOString()
   };
   savings.unshift(entry);
   await saveSavings();
@@ -686,11 +1048,12 @@ document.getElementById('add-btn').addEventListener('click', async () => {
   const category = document.getElementById('category').value;
   const type = document.getElementById('paytype').value;
   const note = document.getElementById('note').value.trim();
+  const dateVal = document.getElementById('date').value || todayStr();
 
   const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     amount, category, type, note, who: currentWho,
-    date: new Date().toISOString()
+    date: new Date(dateVal + 'T12:00:00').toISOString()
   };
   expenses.unshift(entry);
   await save();
