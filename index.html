@@ -152,9 +152,23 @@
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="login-view">
+  <h1>Our ledger</h1>
+  <p class="sub">Sign in to see your household expenses.</p>
+  <div class="card">
+    <div class="error" id="login-error">That Google account isn't allowed to use this ledger.</div>
+    <button class="submit" id="login-btn">Sign in with Google</button>
+  </div>
+</div>
+
+<div class="wrap" id="app-view" style="display:none;">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem;">
+    <button class="submit" style="width:auto;margin-top:0;padding:6px 14px;font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--line);" id="logout-btn">Sign out</button>
+  </div>
+
 
   <h1>Our ledger</h1>
   <p class="sub">Shared household expenses. Anyone with this link can add and see entries.</p>
@@ -309,6 +323,7 @@ const firebaseConfig = {
 // ===== END CONFIG =====
 
 let db = null;
+let auth = null;
 
 function initFirebase(){
   if(firebaseConfig.apiKey === "YOUR_API_KEY"){
@@ -317,10 +332,27 @@ function initFirebase(){
   }
   firebase.initializeApp(firebaseConfig);
   db = firebase.database();
+  auth = firebase.auth();
 
+  auth.onAuthStateChanged(user => {
+    if(user){
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      attachListeners();
+    } else {
+      document.getElementById('login-view').style.display = 'block';
+      document.getElementById('app-view').style.display = 'none';
+    }
+  });
+}
+
+function attachListeners(){
   db.ref('expenses').on('value', snap => {
     expenses = snap.val() || [];
     render();
+  }, () => {
+    document.getElementById('login-error').style.display = 'block';
+    auth.signOut();
   });
   db.ref('savings').on('value', snap => {
     savings = snap.val() || [];
@@ -339,6 +371,19 @@ function initFirebase(){
     populateSelect('paytype', payTypes);
   });
 }
+
+document.getElementById('login-btn').addEventListener('click', () => {
+  const errorEl = document.getElementById('login-error');
+  errorEl.style.display = 'none';
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(() => {
+    errorEl.style.display = 'block';
+  });
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  auth.signOut();
+});
 
 async function save(){
   await db.ref('expenses').set(expenses);
