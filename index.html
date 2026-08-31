@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Ledger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#23262B;
+    --paper:#FAF8F4;
+    --card:#FFFFFF;
+    --line:#E4E1D8;
+    --teal:#3E7C7B;
+    --teal-dark:#255351;
+    --ochre:#C98A3E;
+    --muted:#8A877D;
+    --danger:#B4482F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:0 0 3rem;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:1.5rem 1.25rem;}
+
+  h1{
+    font-family:'Lora',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0 0 4px;
+  }
+  .sub{color:var(--muted);font-size:14px;margin:0 0 1.5rem;}
+
+  .banner{
+    border:1px solid var(--line);
+    border-left:3px solid var(--ochre);
+    border-radius:6px;
+    padding:12px 14px;
+    font-size:14px;
+    margin-bottom:1.5rem;
+    background:var(--card);
+  }
+  .banner.ok{border-left-color:var(--teal);}
+
+  .stats{display:flex;gap:12px;margin-bottom:1.5rem;}
+  .stat{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+  }
+  .stat .label{font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .stat .num{font-family:'Lora',serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:1.5rem;
+  }
+  .card h2{font-size:16px;font-weight:600;margin:0 0 14px;font-family:'Inter',sans-serif;}
+
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;margin-top:12px;}
+  label:first-of-type{margin-top:0;}
+  input, select{
+    width:100%;
+    font-family:inherit;
+    font-size:15px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus, select:focus{outline:2px solid var(--teal);outline-offset:1px;}
+
+  .who{display:flex;gap:8px;margin-top:6px;}
+  .who button{
+    flex:1;
+    padding:8px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:6px;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+    color:var(--ink);
+  }
+  .who button.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+
+  .submit{
+    margin-top:16px;
+    width:100%;
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    padding:11px;
+    border-radius:6px;
+    font-size:15px;
+    font-weight:500;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .submit:active{background:var(--teal-dark);}
+  .error{color:var(--danger);font-size:13px;margin-top:6px;display:none;}
+
+  .cat-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px;}
+  .cat-row .name{width:88px;flex-shrink:0;color:var(--muted);}
+  .cat-row .bar-bg{flex:1;background:#EFEDE6;border-radius:4px;height:8px;overflow:hidden;}
+  .cat-row .bar-fill{background:var(--teal);height:100%;}
+  .cat-row .amt{width:64px;text-align:right;font-variant-numeric:tabular-nums;}
+
+  .entry{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .entry:last-child{border-bottom:none;}
+  .entry .meta{color:var(--muted);font-size:12px;margin-top:2px;}
+  .entry .amt{font-variant-numeric:tabular-nums;font-weight:500;}
+  .entry .del{
+    background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:13px;padding:4px 8px;font-family:inherit;
+  }
+  .entry .del:hover{color:var(--danger);}
+
+  .empty{color:var(--muted);font-size:14px;padding:8px 0;}
+
+  .weeks{display:flex;align-items:flex-end;gap:6px;height:100px;margin-top:8px;}
+  .weeks .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .weeks .bar{width:100%;background:var(--ochre);border-radius:3px 3px 0 0;min-height:2px;}
+  .weeks .wk-label{font-size:10px;color:var(--muted);}
+
+  .person-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;}
+  .person-card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;}
+  .person-card .pname{font-family:'Lora',serif;font-weight:600;font-size:15px;margin-bottom:8px;}
+  .person-card .prow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+  .person-card .prow .plabel{color:var(--muted);}
+  .person-card .prow .pval{font-variant-numeric:tabular-nums;font-weight:500;}
+
+  .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:1rem;}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Our ledger</h1>
+  <p class="sub">Shared household expenses. Anyone with this link can add and see entries.</p>
+
+  <div class="banner" id="config-banner" style="display:none;border-left-color:var(--danger);">
+    This app needs your Firebase config filled in. Open the file, search for "PASTE YOUR FIREBASE CONFIG HERE", and paste your project's config there.
+  </div>
+
+  <div id="banner" class="banner"></div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">This week</div>
+      <div class="num" id="week-total">₹0</div>
+    </div>
+    <div class="stat">
+      <div class="label">This month</div>
+      <div class="num" id="month-total">₹0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Add an expense</h2>
+    <label for="amount">Amount (₹)</label>
+    <input type="number" id="amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
+
+    <label for="category">Category</label>
+    <select id="category"></select>
+
+    <label for="paytype">Paid via</label>
+    <select id="paytype"></select>
+
+    <label for="note">Note (optional)</label>
+    <input type="text" id="note" placeholder="Milk, vegetables">
+
+    <label>Added by</label>
+    <div class="who" id="exp-who">
+      <button type="button" class="active" data-who="Sugun">Sugun</button>
+      <button type="button" data-who="Sreelu">Sreelu</button>
+    </div>
+
+    <div class="error" id="error-msg">Enter an amount first.</div>
+    <button class="submit" id="add-btn">Add expense</button>
+  </div>
+
+  <div class="card">
+    <h2>Add savings</h2>
+    <label for="save-amount">Amount (₹)</label>
+    <input type="number" id="save-amount" inputmode="decimal" placeholder="0" min="0" step="0.01">
+
+    <label for="save-category">Category</label>
+    <select id="save-category"></select>
+
+    <label for="save-note">Note (optional)</label>
+    <input type="text" id="save-note" placeholder="Fixed deposit, RD">
+
+    <label>Added by</label>
+    <div class="who" id="save-who">
+      <button type="button" class="active" data-who="Sugun">Sugun</button>
+      <button type="button" data-who="Sreelu">Sreelu</button>
+    </div>
+
+    <div class="error" id="save-error-msg">Enter an amount first.</div>
+    <button class="submit" id="save-add-btn">Add savings</button>
+  </div>
+
+  <div class="card">
+    <h2>Savings dashboard</h2>
+    <div class="stats" style="margin-bottom:1rem;">
+      <div class="stat">
+        <div class="label">Total saved</div>
+        <div class="num" id="save-total">₹0</div>
+      </div>
+      <div class="stat">
+        <div class="label">This month</div>
+        <div class="num" id="save-month-total">₹0</div>
+      </div>
+    </div>
+    <div class="weeks" id="save-weeks-chart"></div>
+    <div style="margin-top:1rem;" id="save-cat-breakdown"></div>
+  </div>
+
+  <div class="card">
+    <h2>By person</h2>
+    <div id="person-breakdown"></div>
+  </div>
+
+  <div class="card">
+    <h2>Top 5 categories</h2>
+    <div id="cat-breakdown"><div class="empty">No entries yet.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>By payment type</h2>
+    <div id="pay-breakdown"><div class="empty">No entries yet.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Last 8 weeks</h2>
+    <div class="weeks" id="weeks-chart"></div>
+  </div>
+
+  <div class="card">
+    <h2>Recent entries</h2>
+    <div id="entries-list"><div class="empty">Nothing logged yet. Add your first expense above.</div></div>
+  </div>
+
+  <p class="footer-note">Data is stored in your own Firebase project and syncs live between devices.</p>
+</div>
+
+<script>
+let expenses = [];
+let savings = [];
+let currentSaveWho = 'Sugun';
+let categories = ['Groceries','Utilities','Transport','Dining','Health','Shopping','Rent','Other'];
+let savingsCategories = ['Mutual funds','Stocks','Physical Gold','Chitti','Others'];
+let payTypes = ['Cash','UPI','Card','Net banking','Other'];
+let currentWho = 'Sugun';
+const ADD_NEW = '__add_new__';
+
+function fmt(n){
+  return '\u20B9' + Number(n).toLocaleString('en-IN', {maximumFractionDigits:0});
+}
+
+function startOfWeek(d){
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  dt.setDate(dt.getDate() + diff);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+function startOfMonth(d){
+  const dt = new Date(d);
+  dt.setDate(1);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+// ===== PASTE YOUR FIREBASE CONFIG HERE =====
+// Get this from: Firebase Console > Project settings > General > Your apps > SDK setup and configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBXrrnqrvT-YSXn6UxdHOyRk-JCqCTnQT8",
+  authDomain: "our-finance-ledger.firebaseapp.com",
+  databaseURL: "https://our-finance-ledger-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "our-finance-ledger",
+  storageBucket: "our-finance-ledger.firebasestorage.app",
+  messagingSenderId: "242323395613",
+  appId: "1:242323395613:web:b788d200f248801e60e2f4"
+};
+// ===== END CONFIG =====
+
+let db = null;
+
+function initFirebase(){
+  if(firebaseConfig.apiKey === "YOUR_API_KEY"){
+    document.getElementById('config-banner').style.display = 'block';
+    return;
+  }
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+
+  db.ref('expenses').on('value', snap => {
+    expenses = snap.val() || [];
+    render();
+  });
+  db.ref('savings').on('value', snap => {
+    savings = snap.val() || [];
+    render();
+  });
+  db.ref('categories').on('value', snap => {
+    categories = snap.val() || categories;
+    populateSelect('category', categories);
+  });
+  db.ref('save_categories').on('value', snap => {
+    savingsCategories = snap.val() || savingsCategories;
+    populateSelect('save-category', savingsCategories);
+  });
+  db.ref('paytypes').on('value', snap => {
+    payTypes = snap.val() || payTypes;
+    populateSelect('paytype', payTypes);
+  });
+}
+
+async function save(){
+  await db.ref('expenses').set(expenses);
+}
+
+async function saveSavings(){
+  await db.ref('savings').set(savings);
+}
+
+async function saveCategories(){
+  await db.ref('categories').set(categories);
+}
+
+async function saveSaveCategories(){
+  await db.ref('save_categories').set(savingsCategories);
+}
+
+async function savePayTypes(){
+  await db.ref('paytypes').set(payTypes);
+}
+
+function populateSelect(id, list){
+  const el = document.getElementById(id);
+  const current = el.value;
+  el.innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('')
+    + `<option value="${ADD_NEW}">+ Add new...</option>`;
+  if(list.includes(current)) el.value = current;
+}
+
+function render(){
+  const now = new Date();
+  const wkStart = startOfWeek(now);
+  const moStart = startOfMonth(now);
+
+  const weekEntries = expenses.filter(e => new Date(e.date) >= wkStart);
+  const monthEntries = expenses.filter(e => new Date(e.date) >= moStart);
+
+  const weekTotal = weekEntries.reduce((s,e)=>s+e.amount,0);
+  const monthTotal = monthEntries.reduce((s,e)=>s+e.amount,0);
+
+  document.getElementById('week-total').textContent = fmt(weekTotal);
+  document.getElementById('month-total').textContent = fmt(monthTotal);
+
+  const banner = document.getElementById('banner');
+  if(expenses.length === 0){
+    banner.className = 'banner';
+    banner.textContent = 'No expenses logged yet. Add the first one below.';
+  } else {
+    const lastDate = new Date(expenses[0].date);
+    const daysAgo = Math.floor((now - lastDate) / 86400000);
+    if(weekEntries.length === 0){
+      banner.className = 'banner';
+      banner.textContent = 'Nothing entered this week yet' + (daysAgo>0? (' — last entry ' + daysAgo + ' day' + (daysAgo>1?'s':'') + ' ago.') : '.');
+    } else {
+      banner.className = 'banner ok';
+      banner.textContent = weekEntries.length + ' entr' + (weekEntries.length>1?'ies':'y') + ' logged this week. Nice.';
+    }
+  }
+
+  const saveTotal = savings.reduce((s,e)=>s+e.amount,0);
+  const saveMonthTotal = savings.filter(e => new Date(e.date) >= moStart).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('save-total').textContent = fmt(saveTotal);
+  document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
+
+  const saveWeeksChart = document.getElementById('save-weeks-chart');
+  const saveBuckets = [];
+  for(let i=7;i>=0;i--){
+    const ws = new Date(wkStart);
+    ws.setDate(ws.getDate() - i*7);
+    const we = new Date(ws);
+    we.setDate(we.getDate() + 7);
+    const total = savings.filter(e=>{
+      const d = new Date(e.date);
+      return d >= ws && d < we;
+    }).reduce((s,e)=>s+e.amount,0);
+    saveBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
+  }
+  const maxSaveWeek = Math.max(...saveBuckets.map(w=>w.total), 1);
+  saveWeeksChart.innerHTML = saveBuckets.map(w => `
+    <div class="col">
+      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxSaveWeek*90))}px;background:var(--teal)"></div>
+      <div class="wk-label">${w.label}</div>
+    </div>
+  `).join('');
+
+  const saveCatTotals = {};
+  savings.forEach(e => { const c = e.category || 'Others'; saveCatTotals[c] = (saveCatTotals[c]||0) + e.amount; });
+  const saveCatBox = document.getElementById('save-cat-breakdown');
+  const saveCats = Object.entries(saveCatTotals).sort((a,b)=>b[1]-a[1]);
+  if(saveCats.length === 0){
+    saveCatBox.innerHTML = '';
+  } else {
+    const maxSaveCat = saveCats[0][1];
+    saveCatBox.innerHTML = saveCats.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxSaveCat*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
+  const personBox = document.getElementById('person-breakdown');
+  personBox.innerHTML = `<div class="person-grid">${people.map(p => {
+    const expTotal = expenses.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
+    const savTotal = savings.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
+    return `
+      <div class="person-card">
+        <div class="pname">${p}</div>
+        <div class="prow"><span class="plabel">Spent</span><span class="pval">${fmt(expTotal)}</span></div>
+        <div class="prow"><span class="plabel">Saved</span><span class="pval">${fmt(savTotal)}</span></div>
+      </div>
+    `;
+  }).join('')}</div>`;
+
+  const catTotals = {};
+  expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + e.amount; });
+  const catBox = document.getElementById('cat-breakdown');
+  const cats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(cats.length === 0){
+    catBox.innerHTML = '<div class="empty">No entries yet.</div>';
+  } else {
+    const max = cats[0][1];
+    catBox.innerHTML = cats.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/max*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const payTotals = {};
+  expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });
+  const payBox = document.getElementById('pay-breakdown');
+  const pays = Object.entries(payTotals).sort((a,b)=>b[1]-a[1]);
+  if(pays.length === 0){
+    payBox.innerHTML = '<div class="empty">No entries yet.</div>';
+  } else {
+    const maxPay = pays[0][1];
+    payBox.innerHTML = pays.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxPay*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const weeksChart = document.getElementById('weeks-chart');
+  const weekBuckets = [];
+  for(let i=7;i>=0;i--){
+    const ws = new Date(wkStart);
+    ws.setDate(ws.getDate() - i*7);
+    const we = new Date(ws);
+    we.setDate(we.getDate() + 7);
+    const total = expenses.filter(e=>{
+      const d = new Date(e.date);
+      return d >= ws && d < we;
+    }).reduce((s,e)=>s+e.amount,0);
+    weekBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
+  }
+  const maxWeek = Math.max(...weekBuckets.map(w=>w.total), 1);
+  weeksChart.innerHTML = weekBuckets.map(w => `
+    <div class="col">
+      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxWeek*90))}px"></div>
+      <div class="wk-label">${w.label}</div>
+    </div>
+  `).join('');
+
+  const list = document.getElementById('entries-list');
+  if(expenses.length === 0){
+    list.innerHTML = '<div class="empty">Nothing logged yet. Add your first expense above.</div>';
+  } else {
+    list.innerHTML = expenses.slice(0,25).map(e => `
+      <div class="entry">
+        <div>
+          <div>${e.category}${e.note ? ' — ' + e.note : ''}</div>
+          <div class="meta">${new Date(e.date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})} · ${e.who}${e.type ? ' · ' + e.type : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div class="amt">${fmt(e.amount)}</div>
+          <button class="del" data-id="${e.id}" aria-label="Delete entry">Delete</button>
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll('.del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        expenses = expenses.filter(e => e.id !== btn.dataset.id);
+        await save();
+        render();
+      });
+    });
+  }
+}
+
+document.getElementById('category').addEventListener('change', async (e) => {
+  if(e.target.value === ADD_NEW){
+    const name = prompt('New category name');
+    if(name && name.trim()){
+      const clean = name.trim();
+      if(!categories.includes(clean)) categories.push(clean);
+      await saveCategories();
+      populateSelect('category', categories);
+      document.getElementById('category').value = clean;
+    } else {
+      populateSelect('category', categories);
+    }
+  }
+});
+
+document.getElementById('save-category').addEventListener('change', async (e) => {
+  if(e.target.value === ADD_NEW){
+    const name = prompt('New savings category');
+    if(name && name.trim()){
+      const clean = name.trim();
+      if(!savingsCategories.includes(clean)) savingsCategories.push(clean);
+      await saveSaveCategories();
+      populateSelect('save-category', savingsCategories);
+      document.getElementById('save-category').value = clean;
+    } else {
+      populateSelect('save-category', savingsCategories);
+    }
+  }
+});
+
+document.getElementById('paytype').addEventListener('change', async (e) => {
+  if(e.target.value === ADD_NEW){
+    const name = prompt('New payment type');
+    if(name && name.trim()){
+      const clean = name.trim();
+      if(!payTypes.includes(clean)) payTypes.push(clean);
+      await savePayTypes();
+      populateSelect('paytype', payTypes);
+      document.getElementById('paytype').value = clean;
+    } else {
+      populateSelect('paytype', payTypes);
+    }
+  }
+});
+
+document.querySelectorAll('#save-who button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#save-who button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSaveWho = btn.dataset.who;
+  });
+});
+
+document.getElementById('save-add-btn').addEventListener('click', async () => {
+  const amountEl = document.getElementById('save-amount');
+  const errorEl = document.getElementById('save-error-msg');
+  const amount = parseFloat(amountEl.value);
+
+  if(!amount || amount <= 0){
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+
+  const note = document.getElementById('save-note').value.trim();
+  const category = document.getElementById('save-category').value;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    amount, category, note, who: currentSaveWho,
+    date: new Date().toISOString()
+  };
+  savings.unshift(entry);
+  await saveSavings();
+
+  amountEl.value = '';
+  document.getElementById('save-note').value = '';
+  render();
+});
+
+document.getElementById('save-amount').addEventListener('input', () => {
+  document.getElementById('save-error-msg').style.display = 'none';
+});
+
+document.querySelectorAll('#exp-who button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#exp-who button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentWho = btn.dataset.who;
+  });
+});
+
+document.getElementById('add-btn').addEventListener('click', async () => {
+  const amountEl = document.getElementById('amount');
+  const errorEl = document.getElementById('error-msg');
+  const amount = parseFloat(amountEl.value);
+
+  if(!amount || amount <= 0){
+    errorEl.style.display = 'block';
+    return;
+  }
+  errorEl.style.display = 'none';
+
+  const category = document.getElementById('category').value;
+  const type = document.getElementById('paytype').value;
+  const note = document.getElementById('note').value.trim();
+
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    amount, category, type, note, who: currentWho,
+    date: new Date().toISOString()
+  };
+  expenses.unshift(entry);
+  await save();
+
+  amountEl.value = '';
+  document.getElementById('note').value = '';
+  render();
+});
+
+document.getElementById('amount').addEventListener('input', () => {
+  document.getElementById('error-msg').style.display = 'none';
+});
+
+initFirebase();
+</script>
+</body>
+</html>
