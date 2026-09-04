@@ -13,6 +13,8 @@ let loadedExpenses = false;
 let loadedSavings = false;
 let authMode = 'signin';
 let tableSort = { col: 'date', dir: 'desc' };
+let entriesListPage = 1;
+let tablePage = 1;
 
 let db = null;
 let auth = null;

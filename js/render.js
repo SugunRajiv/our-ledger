@@ -1,3 +1,25 @@
+const PAGE_SIZE = 10;
+
+function paginate(items, page){
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const clamped = Math.min(Math.max(1, page), totalPages);
+  const start = (clamped - 1) * PAGE_SIZE;
+  return { pageItems: items.slice(start, start + PAGE_SIZE), page: clamped, totalPages };
+}
+
+function renderPager(containerId, page, totalPages, onChange){
+  const el = document.getElementById(containerId);
+  if(totalPages <= 1){
+    el.innerHTML = '';
+    return;
+  }
+  const options = Array.from({length: totalPages}, (_, i) => i + 1)
+    .map(p => `<option value="${p}"${p === page ? ' selected' : ''}>Page ${p} of ${totalPages}</option>`)
+    .join('');
+  el.innerHTML = `<select class="pager-select">${options}</select>`;
+  el.querySelector('select').addEventListener('change', (e) => onChange(Number(e.target.value)));
+}
+
 function render(){
   const now = new Date();
   const wkStart = startOfWeek(now);
@@ -44,43 +66,8 @@ function render(){
   document.getElementById('save-total').textContent = fmt(saveTotal);
   document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
 
-  const saveWeeksChart = document.getElementById('save-weeks-chart');
-  const saveBuckets = [];
-  for(let i=7;i>=0;i--){
-    const ws = new Date(wkStart);
-    ws.setDate(ws.getDate() - i*7);
-    const we = new Date(ws);
-    we.setDate(we.getDate() + 7);
-    const total = savings.filter(e=>{
-      const d = new Date(e.date);
-      return d >= ws && d < we;
-    }).reduce((s,e)=>s+e.amount,0);
-    saveBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
-  }
-  const maxSaveWeek = Math.max(...saveBuckets.map(w=>w.total), 1);
-  saveWeeksChart.innerHTML = saveBuckets.map(w => `
-    <div class="col">
-      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxSaveWeek*90))}px;background:var(--teal)"></div>
-      <div class="wk-label">${w.label}</div>
-    </div>
-  `).join('');
-
-  const saveCatTotals = {};
-  savings.forEach(e => { const c = e.category || 'Others'; saveCatTotals[c] = (saveCatTotals[c]||0) + e.amount; });
-  const saveCatBox = document.getElementById('save-cat-breakdown');
-  const saveCats = Object.entries(saveCatTotals).sort((a,b)=>b[1]-a[1]);
-  if(saveCats.length === 0){
-    saveCatBox.innerHTML = '';
-  } else {
-    const maxSaveCat = saveCats[0][1];
-    saveCatBox.innerHTML = saveCats.map(([name, amt]) => `
-      <div class="cat-row">
-        <div class="name">${name}</div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxSaveCat*100)}%"></div></div>
-        <div class="amt">${fmt(amt)}</div>
-      </div>
-    `).join('');
-  }
+  renderDonut('savings-weekly-donut', last30DayWeeklyBuckets(savings), 'Last 4 weeks');
+  renderDonut('save-cat-breakdown', lastMonthCategoryTotals(savings), 'This month');
 
   const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
   const personBox = document.getElementById('person-breakdown');
@@ -96,22 +83,8 @@ function render(){
     `;
   }).join('')}</div>`;
 
-  const catTotals = {};
-  expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + e.amount; });
-  const catBox = document.getElementById('cat-breakdown');
-  const cats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  if(cats.length === 0){
-    catBox.innerHTML = '<div class="empty">No entries yet.</div>';
-  } else {
-    const max = cats[0][1];
-    catBox.innerHTML = cats.map(([name, amt]) => `
-      <div class="cat-row">
-        <div class="name">${name}</div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/max*100)}%"></div></div>
-        <div class="amt">${fmt(amt)}</div>
-      </div>
-    `).join('');
-  }
+  renderDonut('cat-breakdown', lastMonthCategoryTotals(expenses), 'This month');
+  renderDonut('expense-weekly-donut', last30DayWeeklyBuckets(expenses), 'Last 4 weeks');
 
   const payTotals = {};
   expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });
@@ -130,55 +103,19 @@ function render(){
     `).join('');
   }
 
-  const weeksChart = document.getElementById('weeks-chart');
-  const weekBuckets = [];
-  for(let i=7;i>=0;i--){
-    const ws = new Date(wkStart);
-    ws.setDate(ws.getDate() - i*7);
-    const we = new Date(ws);
-    we.setDate(we.getDate() + 7);
-    const total = expenses.filter(e=>{
-      const d = new Date(e.date);
-      return d >= ws && d < we;
-    }).reduce((s,e)=>s+e.amount,0);
-    weekBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
-  }
-  const maxWeek = Math.max(...weekBuckets.map(w=>w.total), 1);
-  weeksChart.innerHTML = weekBuckets.map(w => `
-    <div class="col">
-      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxWeek*90))}px"></div>
-      <div class="wk-label">${w.label}</div>
-    </div>
-  `).join('');
+  renderEntriesList();
+  renderTable();
+}
 
-  const last7Chart = document.getElementById('last7-chart');
-  const last7Buckets = [];
-  for(let i=6;i>=0;i--){
-    const ds = new Date(now);
-    ds.setDate(ds.getDate() - i);
-    ds.setHours(0,0,0,0);
-    const de = new Date(ds);
-    de.setDate(de.getDate() + 1);
-    const total = expenses.filter(e => {
-      const d = new Date(e.date);
-      return d >= ds && d < de;
-    }).reduce((s,e)=>s+e.amount,0);
-    last7Buckets.push({label: ds.toLocaleDateString('en-IN', {weekday:'short'}), total});
-  }
-  document.getElementById('last7-total').textContent = fmt(last7Buckets.reduce((s,b)=>s+b.total,0));
-  const maxLast7 = Math.max(...last7Buckets.map(b=>b.total), 1);
-  last7Chart.innerHTML = last7Buckets.map(b => `
-    <div class="col">
-      <div class="bar" style="height:${Math.max(2, Math.round(b.total/maxLast7*90))}px;background:var(--ochre)"></div>
-      <div class="wk-label">${b.label}</div>
-    </div>
-  `).join('');
+function renderEntriesList(){
+  const { pageItems, page, totalPages } = paginate(expenses, entriesListPage);
+  entriesListPage = page;
 
   const list = document.getElementById('entries-list');
   if(expenses.length === 0){
     list.innerHTML = '<div class="empty">Nothing logged yet. Add your first expense above.</div>';
   } else {
-    list.innerHTML = expenses.slice(0,25).map(e => `
+    list.innerHTML = pageItems.map(e => `
       <div class="entry">
         <div>
           <div>${e.category}${e.note ? ' — ' + e.note : ''}</div>
@@ -202,7 +139,10 @@ function render(){
     });
   }
 
-  renderTable();
+  renderPager('entries-list-pager', entriesListPage, totalPages, (p) => {
+    entriesListPage = p;
+    renderEntriesList();
+  });
 }
 
 function buildAllEntries(){
@@ -274,11 +214,15 @@ function renderTable(){
   if(rows.length === 0){
     tbody.innerHTML = '';
     emptyEl.style.display = 'block';
+    document.getElementById('table-pager').innerHTML = '';
     return;
   }
   emptyEl.style.display = 'none';
 
-  tbody.innerHTML = rows.map(r => `
+  const { pageItems, page, totalPages } = paginate(rows, tablePage);
+  tablePage = page;
+
+  tbody.innerHTML = pageItems.map(r => `
     <tr>
       <td>${new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</td>
       <td class="kind-${r.kind}">${r.kind === 'expense' ? 'Expense' : 'Saving'}</td>
@@ -312,6 +256,11 @@ function renderTable(){
       }
     });
   });
+
+  renderPager('table-pager', tablePage, totalPages, (p) => {
+    tablePage = p;
+    renderTable();
+  });
 }
 
 document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
@@ -323,12 +272,16 @@ document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
       tableSort.col = col;
       tableSort.dir = col === 'amount' ? 'desc' : 'asc';
     }
+    tablePage = 1;
     renderTable();
   });
 });
 
 ['filter-type','filter-who','filter-category','filter-from','filter-to'].forEach(id => {
-  document.getElementById(id).addEventListener('change', renderTable);
+  document.getElementById(id).addEventListener('change', () => {
+    tablePage = 1;
+    renderTable();
+  });
 });
 
 document.getElementById('export-btn').addEventListener('click', () => {

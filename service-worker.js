@@ -1,4 +1,4 @@
-const CACHE_NAME = 'our-ledger-v2';
+const CACHE_NAME = 'our-ledger-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './js/settings.js',
   './js/dialogs.js',
   './js/entries.js',
+  './js/charts.js',
   './js/render.js',
   './js/main.js',
   './manifest.json',
