@@ -1,3 +1,16 @@
+function updateUserBadge(user){
+  const avatarEl = document.getElementById('user-avatar');
+  const nameEl = document.getElementById('user-name-label');
+  const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Account');
+
+  nameEl.textContent = displayName;
+  if(user.photoURL){
+    avatarEl.innerHTML = `<img src="${user.photoURL}" alt="">`;
+  } else {
+    avatarEl.textContent = displayName.charAt(0).toUpperCase();
+  }
+}
+
 function applyCurrencyToUI(){
   document.getElementById('currency-select').value = currencyCode;
   const label = `Amount (${currencySymbol()})`;

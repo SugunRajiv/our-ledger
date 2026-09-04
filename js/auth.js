@@ -17,6 +17,7 @@ function initFirebase(){
 
     if(user && !isUnverifiedPassword){
       attachListeners();
+      updateUserBadge(user);
     }
   });
 }
