@@ -78,31 +78,39 @@
           <option value="hi">Hindi</option>
           <option value="te">Telugu</option>
         </select>
-        <div class="hint">More languages coming soon — the app stays in English for now.</div>
-
-        <div class="divider"><span>Categories &amp; payment types</span></div>
-        <div class="manage-grid">
-          <div class="manage-col">
-            <h3>Expense categories</h3>
-            <div id="manage-categories"></div>
-            <button type="button" class="link-btn" id="add-category-btn">+ Add category</button>
-          </div>
-          <div class="manage-col">
-            <h3>Savings categories</h3>
-            <div id="manage-save-categories"></div>
-            <button type="button" class="link-btn" id="add-save-category-btn">+ Add category</button>
-          </div>
-          <div class="manage-col">
-            <h3>Payment types</h3>
-            <div id="manage-paytypes"></div>
-            <button type="button" class="link-btn" id="add-paytype-btn">+ Add type</button>
-          </div>
-        </div>
+        <div class="divider"></div>
+        <button type="button" class="menu-item" id="open-categories-btn">Categories &amp; payment types</button>
 
         <button class="submit secondary" id="logout-btn">Sign out</button>
       </div>
     </details>
   </div>
+
+  <dialog class="modal" id="categories-dialog">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>Categories &amp; payment types</h2>
+        <button type="button" class="modal-close" id="close-categories-dialog" aria-label="Close">&times;</button>
+      </div>
+      <div class="manage-grid">
+        <div class="manage-col">
+          <h3>Expense categories</h3>
+          <div id="manage-categories"></div>
+          <button type="button" class="link-btn" id="add-category-btn">+ Add category</button>
+        </div>
+        <div class="manage-col">
+          <h3>Savings categories</h3>
+          <div id="manage-save-categories"></div>
+          <button type="button" class="link-btn" id="add-save-category-btn">+ Add category</button>
+        </div>
+        <div class="manage-col">
+          <h3>Payment types</h3>
+          <div id="manage-paytypes"></div>
+          <button type="button" class="link-btn" id="add-paytype-btn">+ Add type</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <h1>Our ledger</h1>
   <p class="sub">Shared household expenses.</p>
