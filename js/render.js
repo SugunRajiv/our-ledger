@@ -80,8 +80,8 @@ function render(){
   document.getElementById('save-total').textContent = fmt(saveTotal);
   document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
 
-  renderDonut('savings-weekly-donut', last30DayWeeklyBuckets(savings), 'Last 4 weeks');
-  renderDonut('save-cat-breakdown', lastMonthCategoryTotals(savings), 'This month');
+  renderTrendChart('savings-weekly-donut', last30DayWeeklyBuckets(savings), 'var(--teal)');
+  renderColorBars('save-cat-breakdown', lastMonthCategoryTotals(savings));
 
   const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
   const personBox = document.getElementById('person-breakdown');
@@ -97,25 +97,12 @@ function render(){
     `;
   }).join('')}</div>`;
 
-  renderDonut('cat-breakdown', lastMonthCategoryTotals(expenses), 'This month');
-  renderDonut('expense-weekly-donut', last30DayWeeklyBuckets(expenses), 'Last 4 weeks');
+  renderColorBars('cat-breakdown', lastMonthCategoryTotals(expenses));
+  renderTrendChart('expense-weekly-donut', last30DayWeeklyBuckets(expenses), 'var(--ochre)');
 
   const payTotals = {};
   expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });
-  const payBox = document.getElementById('pay-breakdown');
-  const pays = Object.entries(payTotals).sort((a,b)=>b[1]-a[1]);
-  if(pays.length === 0){
-    payBox.innerHTML = '<div class="empty">No entries yet.</div>';
-  } else {
-    const maxPay = pays[0][1];
-    payBox.innerHTML = pays.map(([name, amt]) => `
-      <div class="cat-row">
-        <div class="name">${name}</div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxPay*100)}%"></div></div>
-        <div class="amt">${fmt(amt)}</div>
-      </div>
-    `).join('');
-  }
+  renderColorBars('pay-breakdown', Object.entries(payTotals).map(([label, value]) => ({ label, value })));
 
   renderEntriesList();
   renderTable();

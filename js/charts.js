@@ -1,5 +1,5 @@
-const DONUT_COLORS = ['var(--series-1)','var(--series-2)','var(--series-3)','var(--series-4)','var(--series-5)','var(--series-6)','var(--series-7)'];
-const DONUT_OTHER_COLOR = 'var(--series-other)';
+const CHART_COLORS = ['var(--series-1)','var(--series-2)','var(--series-3)','var(--series-4)','var(--series-5)','var(--series-6)','var(--series-7)'];
+const CHART_OTHER_COLOR = 'var(--series-other)';
 
 function last30DayWeeklyBuckets(entries){
   const start = new Date();
@@ -69,7 +69,8 @@ function hideChartTooltip(){
   if(tt) tt.style.display = 'none';
 }
 
-function renderDonut(containerId, items, centerLabel){
+/* Colorful ranked horizontal bars — for category / payment-type breakdowns */
+function renderColorBars(containerId, items){
   const container = document.getElementById(containerId);
   let data = items.filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
@@ -78,64 +79,84 @@ function renderDonut(containerId, items, centerLabel){
     return;
   }
 
-  const maxSlices = 7;
-  if(data.length > maxSlices){
-    const head = data.slice(0, maxSlices - 1);
-    const tailTotal = data.slice(maxSlices - 1).reduce((s,d) => s + d.value, 0);
+  const maxBars = 7;
+  if(data.length > maxBars){
+    const head = data.slice(0, maxBars - 1);
+    const tailTotal = data.slice(maxBars - 1).reduce((s,d) => s + d.value, 0);
     data = head.concat([{ label: 'Other', value: tailTotal }]);
   }
 
-  const total = data.reduce((s,d) => s + d.value, 0);
-  const r = 40, cx = 50, cy = 50, strokeW = 16;
-  const circumference = 2 * Math.PI * r;
+  const max = data[0].value;
+  container.innerHTML = data.map((d, i) => {
+    const color = d.label === 'Other' ? CHART_OTHER_COLOR : CHART_COLORS[i % CHART_COLORS.length];
+    const pct = Math.max(4, Math.round(d.value / max * 100));
+    return `
+      <div class="cbar-row">
+        <span class="cbar-dot" style="background:${color}"></span>
+        <div class="cbar-body">
+          <div class="cbar-top">
+            <span class="cbar-label">${d.label}</span>
+            <span class="cbar-val">${fmt(d.value)}</span>
+          </div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:${pct}%;background:${color}"></div></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-  let offset = 0;
-  const slices = data.map((d, i) => {
-    const frac = d.value / total;
-    const len = frac * circumference;
-    const color = d.label === 'Other' ? DONUT_OTHER_COLOR : DONUT_COLORS[i % DONUT_COLORS.length];
-    const slice = {
-      label: d.label, value: d.value, color,
-      dasharray: `${len} ${circumference - len}`,
-      dashoffset: -offset,
-    };
-    offset += len;
-    return slice;
+/* Bar + trend-line combo chart — for weekly/period breakdowns */
+function renderTrendChart(containerId, buckets, colorVar){
+  const container = document.getElementById(containerId);
+  const max = Math.max(...buckets.map(b => b.value), 1);
+
+  const w = 320, h = 170, padTop = 30, padBottom = 28, padX = 24;
+  const plotW = w - padX * 2;
+  const plotH = h - padTop - padBottom;
+  const n = buckets.length;
+  const stepX = plotW / n;
+  const barW = Math.min(46, stepX * 0.5);
+
+  const points = buckets.map((b, i) => {
+    const x = padX + stepX * i + stepX / 2;
+    const y = padTop + plotH - (b.value / max) * plotH;
+    return { x, y, label: b.label, value: b.value };
   });
 
-  const svgSlices = slices.map(s => `
-    <circle class="donut-slice" cx="${cx}" cy="${cy}" r="${r}" fill="none"
-      stroke="${s.color}" stroke-width="${strokeW}"
-      stroke-dasharray="${s.dasharray}" stroke-dashoffset="${s.dashoffset}"
-      data-label="${s.label}" data-value="${s.value}">
-      <title>${s.label}: ${fmt(s.value)}</title>
-    </circle>
+  const bars = points.map(p => {
+    const barH = Math.max(2, (p.value / max) * plotH);
+    const barY = padTop + plotH - barH;
+    return `<rect class="trend-bar" x="${(p.x - barW/2).toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="5" fill="${colorVar}" data-label="${p.label}" data-value="${p.value}"></rect>`;
+  }).join('');
+
+  const linePath = points.map((p,i) => (i===0?'M':'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ');
+  const areaPath = `${linePath} L ${points[points.length-1].x.toFixed(1)} ${(padTop+plotH).toFixed(1)} L ${points[0].x.toFixed(1)} ${(padTop+plotH).toFixed(1)} Z`;
+
+  const dots = points.map(p => `
+    <circle class="trend-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${colorVar}" data-label="${p.label}" data-value="${p.value}"></circle>
   `).join('');
 
-  const legendRows = slices.map(s => `
-    <div class="donut-legend-row">
-      <span class="swatch" style="background:${s.color}"></span>
-      <span class="lbl">${s.label}</span>
-      <span class="val">${fmt(s.value)}</span>
-    </div>
+  const valueLabels = points.map(p => `
+    <text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 10).toFixed(1)}" text-anchor="middle" class="trend-value-label">${fmt(p.value)}</text>
+  `).join('');
+
+  const xLabels = points.map(p => `
+    <text x="${p.x.toFixed(1)}" y="${h - 8}" text-anchor="middle" class="trend-x-label">${p.label}</text>
   `).join('');
 
   container.innerHTML = `
-    <div class="donut-wrap">
-      <div class="donut-svg-box">
-        <svg viewBox="0 0 100 100">
-          <g transform="rotate(-90 ${cx} ${cy})">${svgSlices}</g>
-        </svg>
-        <div class="donut-center">
-          <div class="amt">${fmt(total)}</div>
-          <div class="lbl">${centerLabel || 'Total'}</div>
-        </div>
-      </div>
-      <div class="donut-legend">${legendRows}</div>
-    </div>
+    <svg viewBox="0 0 ${w} ${h}" class="trend-svg" preserveAspectRatio="xMidYMid meet">
+      <line x1="${padX}" y1="${(padTop+plotH).toFixed(1)}" x2="${w-padX}" y2="${(padTop+plotH).toFixed(1)}" class="trend-baseline"></line>
+      <path d="${areaPath}" class="trend-area" fill="${colorVar}"></path>
+      ${bars}
+      <path d="${linePath}" fill="none" class="trend-line" stroke="${colorVar}"></path>
+      ${dots}
+      ${valueLabels}
+      ${xLabels}
+    </svg>
   `;
 
-  container.querySelectorAll('.donut-slice').forEach(el => {
+  container.querySelectorAll('.trend-bar, .trend-dot').forEach(el => {
     el.addEventListener('pointermove', (e) => {
       showChartTooltip(e.clientX, e.clientY, fmt(Number(el.dataset.value)), el.dataset.label);
     });
