@@ -80,6 +80,25 @@
         </select>
         <div class="hint">More languages coming soon — the app stays in English for now.</div>
 
+        <div class="divider"><span>Categories &amp; payment types</span></div>
+        <div class="manage-grid">
+          <div class="manage-col">
+            <h3>Expense categories</h3>
+            <div id="manage-categories"></div>
+            <button type="button" class="link-btn" id="add-category-btn">+ Add category</button>
+          </div>
+          <div class="manage-col">
+            <h3>Savings categories</h3>
+            <div id="manage-save-categories"></div>
+            <button type="button" class="link-btn" id="add-save-category-btn">+ Add category</button>
+          </div>
+          <div class="manage-col">
+            <h3>Payment types</h3>
+            <div id="manage-paytypes"></div>
+            <button type="button" class="link-btn" id="add-paytype-btn">+ Add type</button>
+          </div>
+        </div>
+
         <button class="submit secondary" id="logout-btn">Sign out</button>
       </div>
     </details>
@@ -271,27 +290,6 @@
           <tbody id="entries-table-body"></tbody>
         </table>
         <div class="empty" id="table-empty" style="display:none;">No entries match these filters.</div>
-      </div>
-    </div>
-
-    <div class="card span-2">
-      <h2>Manage categories &amp; payment types</h2>
-      <div class="manage-grid">
-        <div class="manage-col">
-          <h3>Expense categories</h3>
-          <div id="manage-categories"></div>
-          <button type="button" class="link-btn" id="add-category-btn">+ Add category</button>
-        </div>
-        <div class="manage-col">
-          <h3>Savings categories</h3>
-          <div id="manage-save-categories"></div>
-          <button type="button" class="link-btn" id="add-save-category-btn">+ Add category</button>
-        </div>
-        <div class="manage-col">
-          <h3>Payment types</h3>
-          <div id="manage-paytypes"></div>
-          <button type="button" class="link-btn" id="add-paytype-btn">+ Add type</button>
-        </div>
       </div>
     </div>
 
