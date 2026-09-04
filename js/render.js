@@ -210,8 +210,10 @@ function renderTable(){
   const colLabels = { date:'Date', kind:'Type', category:'Category', who:'Who', amount:'Amount' };
   document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
     const col = th.dataset.col;
-    th.classList.toggle('sorted', col === tableSort.col);
-    th.textContent = colLabels[col] + (col === tableSort.col ? (tableSort.dir === 'asc' ? ' ▲' : ' ▼') : '');
+    const isSorted = col === tableSort.col;
+    th.classList.toggle('sorted', isSorted);
+    const arrow = isSorted ? `<span class="sort-arrow">${tableSort.dir === 'asc' ? '▲' : '▼'}</span>` : '';
+    th.innerHTML = colLabels[col] + arrow;
   });
 
   if(rows.length === 0){
