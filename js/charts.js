@@ -24,6 +24,23 @@ function last30DayWeeklyBuckets(entries){
   return buckets;
 }
 
+function currentWeekDailyBuckets(entries){
+  const wkStart = startOfWeek(new Date());
+  const buckets = [];
+  for(let i=0;i<7;i++){
+    const ds = new Date(wkStart);
+    ds.setDate(ds.getDate() + i);
+    const de = new Date(ds);
+    de.setDate(de.getDate() + 1);
+    const total = entries.filter(e => {
+      const d = new Date(e.date);
+      return d >= ds && d < de;
+    }).reduce((s,e)=>s+e.amount,0);
+    buckets.push({ label: ds.toLocaleDateString('en-IN', {weekday:'short'}), value: total });
+  }
+  return buckets;
+}
+
 function lastMonthCategoryTotals(entries){
   const start = new Date();
   start.setDate(start.getDate() - 29);

@@ -80,6 +80,7 @@ function render(){
   document.getElementById('save-total').textContent = fmt(saveTotal);
   document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
 
+  renderTrendChart('savings-week-trend', currentWeekDailyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-weekly-donut', last30DayWeeklyBuckets(savings), 'var(--teal)');
   renderColorBars('save-cat-breakdown', lastMonthCategoryTotals(savings));
 
@@ -97,6 +98,7 @@ function render(){
     `;
   }).join('')}</div>`;
 
+  renderTrendChart('expense-week-trend', currentWeekDailyBuckets(expenses), 'var(--ochre)');
   renderColorBars('cat-breakdown', lastMonthCategoryTotals(expenses));
   renderTrendChart('expense-weekly-donut', last30DayWeeklyBuckets(expenses), 'var(--ochre)');
 
