@@ -1,0 +1,348 @@
+function render(){
+  const now = new Date();
+  const wkStart = startOfWeek(now);
+  const moStart = startOfMonth(now);
+
+  const weekEntries = expenses.filter(e => new Date(e.date) >= wkStart);
+  const monthEntries = expenses.filter(e => new Date(e.date) >= moStart);
+
+  const weekTotal = weekEntries.reduce((s,e)=>s+e.amount,0);
+  const monthTotal = monthEntries.reduce((s,e)=>s+e.amount,0);
+
+  document.getElementById('week-total').textContent = fmt(weekTotal);
+  document.getElementById('month-total').textContent = fmt(monthTotal);
+
+  const budgetBar = document.getElementById('budget-bar');
+  if(monthlyBudget > 0){
+    document.getElementById('budget-total').textContent = fmt(monthTotal) + ' of ' + fmt(monthlyBudget);
+    const pct = Math.min(100, Math.round(monthTotal / monthlyBudget * 100));
+    budgetBar.style.width = pct + '%';
+    budgetBar.style.background = pct >= 100 ? 'var(--danger)' : (pct >= 80 ? 'var(--ochre)' : 'var(--teal)');
+  } else {
+    document.getElementById('budget-total').textContent = 'Not set';
+    budgetBar.style.width = '0%';
+  }
+
+  const banner = document.getElementById('banner');
+  if(expenses.length === 0){
+    banner.className = 'banner';
+    banner.textContent = 'No expenses logged yet. Add the first one below.';
+  } else {
+    const lastDate = new Date(expenses[0].date);
+    const daysAgo = Math.floor((now - lastDate) / 86400000);
+    if(weekEntries.length === 0){
+      banner.className = 'banner';
+      banner.textContent = 'Nothing entered this week yet' + (daysAgo>0? (' — last entry ' + daysAgo + ' day' + (daysAgo>1?'s':'') + ' ago.') : '.');
+    } else {
+      banner.className = 'banner ok';
+      banner.textContent = weekEntries.length + ' entr' + (weekEntries.length>1?'ies':'y') + ' logged this week. Nice.';
+    }
+  }
+
+  const saveTotal = savings.reduce((s,e)=>s+e.amount,0);
+  const saveMonthTotal = savings.filter(e => new Date(e.date) >= moStart).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('save-total').textContent = fmt(saveTotal);
+  document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
+
+  const saveWeeksChart = document.getElementById('save-weeks-chart');
+  const saveBuckets = [];
+  for(let i=7;i>=0;i--){
+    const ws = new Date(wkStart);
+    ws.setDate(ws.getDate() - i*7);
+    const we = new Date(ws);
+    we.setDate(we.getDate() + 7);
+    const total = savings.filter(e=>{
+      const d = new Date(e.date);
+      return d >= ws && d < we;
+    }).reduce((s,e)=>s+e.amount,0);
+    saveBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
+  }
+  const maxSaveWeek = Math.max(...saveBuckets.map(w=>w.total), 1);
+  saveWeeksChart.innerHTML = saveBuckets.map(w => `
+    <div class="col">
+      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxSaveWeek*90))}px;background:var(--teal)"></div>
+      <div class="wk-label">${w.label}</div>
+    </div>
+  `).join('');
+
+  const saveCatTotals = {};
+  savings.forEach(e => { const c = e.category || 'Others'; saveCatTotals[c] = (saveCatTotals[c]||0) + e.amount; });
+  const saveCatBox = document.getElementById('save-cat-breakdown');
+  const saveCats = Object.entries(saveCatTotals).sort((a,b)=>b[1]-a[1]);
+  if(saveCats.length === 0){
+    saveCatBox.innerHTML = '';
+  } else {
+    const maxSaveCat = saveCats[0][1];
+    saveCatBox.innerHTML = saveCats.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxSaveCat*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
+  const personBox = document.getElementById('person-breakdown');
+  personBox.innerHTML = `<div class="person-grid">${people.map(p => {
+    const expTotal = expenses.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
+    const savTotal = savings.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
+    return `
+      <div class="person-card">
+        <div class="pname">${p}</div>
+        <div class="prow"><span class="plabel">Spent</span><span class="pval">${fmt(expTotal)}</span></div>
+        <div class="prow"><span class="plabel">Saved</span><span class="pval">${fmt(savTotal)}</span></div>
+      </div>
+    `;
+  }).join('')}</div>`;
+
+  const catTotals = {};
+  expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category]||0) + e.amount; });
+  const catBox = document.getElementById('cat-breakdown');
+  const cats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(cats.length === 0){
+    catBox.innerHTML = '<div class="empty">No entries yet.</div>';
+  } else {
+    const max = cats[0][1];
+    catBox.innerHTML = cats.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/max*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const payTotals = {};
+  expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });
+  const payBox = document.getElementById('pay-breakdown');
+  const pays = Object.entries(payTotals).sort((a,b)=>b[1]-a[1]);
+  if(pays.length === 0){
+    payBox.innerHTML = '<div class="empty">No entries yet.</div>';
+  } else {
+    const maxPay = pays[0][1];
+    payBox.innerHTML = pays.map(([name, amt]) => `
+      <div class="cat-row">
+        <div class="name">${name}</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(amt/maxPay*100)}%"></div></div>
+        <div class="amt">${fmt(amt)}</div>
+      </div>
+    `).join('');
+  }
+
+  const weeksChart = document.getElementById('weeks-chart');
+  const weekBuckets = [];
+  for(let i=7;i>=0;i--){
+    const ws = new Date(wkStart);
+    ws.setDate(ws.getDate() - i*7);
+    const we = new Date(ws);
+    we.setDate(we.getDate() + 7);
+    const total = expenses.filter(e=>{
+      const d = new Date(e.date);
+      return d >= ws && d < we;
+    }).reduce((s,e)=>s+e.amount,0);
+    weekBuckets.push({label: (ws.getMonth()+1)+'/'+ws.getDate(), total});
+  }
+  const maxWeek = Math.max(...weekBuckets.map(w=>w.total), 1);
+  weeksChart.innerHTML = weekBuckets.map(w => `
+    <div class="col">
+      <div class="bar" style="height:${Math.max(2, Math.round(w.total/maxWeek*90))}px"></div>
+      <div class="wk-label">${w.label}</div>
+    </div>
+  `).join('');
+
+  const last7Chart = document.getElementById('last7-chart');
+  const last7Buckets = [];
+  for(let i=6;i>=0;i--){
+    const ds = new Date(now);
+    ds.setDate(ds.getDate() - i);
+    ds.setHours(0,0,0,0);
+    const de = new Date(ds);
+    de.setDate(de.getDate() + 1);
+    const total = expenses.filter(e => {
+      const d = new Date(e.date);
+      return d >= ds && d < de;
+    }).reduce((s,e)=>s+e.amount,0);
+    last7Buckets.push({label: ds.toLocaleDateString('en-IN', {weekday:'short'}), total});
+  }
+  document.getElementById('last7-total').textContent = fmt(last7Buckets.reduce((s,b)=>s+b.total,0));
+  const maxLast7 = Math.max(...last7Buckets.map(b=>b.total), 1);
+  last7Chart.innerHTML = last7Buckets.map(b => `
+    <div class="col">
+      <div class="bar" style="height:${Math.max(2, Math.round(b.total/maxLast7*90))}px;background:var(--ochre)"></div>
+      <div class="wk-label">${b.label}</div>
+    </div>
+  `).join('');
+
+  const list = document.getElementById('entries-list');
+  if(expenses.length === 0){
+    list.innerHTML = '<div class="empty">Nothing logged yet. Add your first expense above.</div>';
+  } else {
+    list.innerHTML = expenses.slice(0,25).map(e => `
+      <div class="entry">
+        <div>
+          <div>${e.category}${e.note ? ' — ' + e.note : ''}</div>
+          <div class="meta">${new Date(e.date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})} · ${e.who}${e.type ? ' · ' + e.type : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div class="amt">${fmt(e.amount)}</div>
+          <button class="del" data-id="${e.id}" aria-label="Delete entry">Delete</button>
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll('.del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if(!confirm('Delete this entry?')) return;
+        try {
+          await deleteExpenseTx(btn.dataset.id);
+        } catch(err){
+          alert('Could not delete: ' + err.message);
+        }
+      });
+    });
+  }
+
+  renderTable();
+}
+
+function buildAllEntries(){
+  const exp = expenses.map(e => ({
+    id: e.id, date: e.date, kind: 'expense', category: e.category,
+    amount: e.amount, who: e.who, detail: (e.type || '') + (e.note ? ' — ' + e.note : '')
+  }));
+  const sav = savings.map(e => ({
+    id: e.id, date: e.date, kind: 'savings', category: e.category,
+    amount: e.amount, who: e.who, detail: (e.type || '') + (e.note ? ' — ' + e.note : '')
+  }));
+  return exp.concat(sav);
+}
+
+function populateTableFilterOptions(){
+  const whoSel = document.getElementById('filter-who');
+  const catSel = document.getElementById('filter-category');
+  const currentWhoF = whoSel.value || 'all';
+  const currentCatF = catSel.value || 'all';
+
+  const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who)]));
+  whoSel.innerHTML = '<option value="all">All</option>' + people.map(p => `<option value="${p}">${p}</option>`).join('');
+  if(people.includes(currentWhoF)) whoSel.value = currentWhoF;
+
+  const typeF = document.getElementById('filter-type').value;
+  const cats = new Set();
+  if(typeF !== 'savings') expenses.forEach(e => cats.add(e.category));
+  if(typeF !== 'expense') savings.forEach(e => cats.add(e.category));
+  const catList = Array.from(cats);
+  catSel.innerHTML = '<option value="all">All</option>' + catList.map(c => `<option value="${c}">${c}</option>`).join('');
+  if(catList.includes(currentCatF)) catSel.value = currentCatF;
+}
+
+function getFilteredSortedEntries(){
+  const typeF = document.getElementById('filter-type').value;
+  const whoF = document.getElementById('filter-who').value;
+  const catF = document.getElementById('filter-category').value;
+  const fromF = document.getElementById('filter-from').value;
+  const toF = document.getElementById('filter-to').value;
+
+  let rows = buildAllEntries();
+  if(typeF !== 'all') rows = rows.filter(r => r.kind === typeF);
+  if(whoF !== 'all') rows = rows.filter(r => r.who === whoF);
+  if(catF !== 'all') rows = rows.filter(r => r.category === catF);
+  if(fromF) rows = rows.filter(r => r.date.slice(0,10) >= fromF);
+  if(toF) rows = rows.filter(r => r.date.slice(0,10) <= toF);
+
+  const dir = tableSort.dir === 'asc' ? 1 : -1;
+  rows.sort((a,b) => {
+    if(tableSort.col === 'amount') return (a.amount - b.amount) * dir;
+    return String(a[tableSort.col]).localeCompare(String(b[tableSort.col])) * dir;
+  });
+  return rows;
+}
+
+function renderTable(){
+  populateTableFilterOptions();
+  const rows = getFilteredSortedEntries();
+  const tbody = document.getElementById('entries-table-body');
+  const emptyEl = document.getElementById('table-empty');
+
+  const colLabels = { date:'Date', kind:'Type', category:'Category', who:'Who', amount:'Amount' };
+  document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
+    const col = th.dataset.col;
+    th.classList.toggle('sorted', col === tableSort.col);
+    th.textContent = colLabels[col] + (col === tableSort.col ? (tableSort.dir === 'asc' ? ' ▲' : ' ▼') : '');
+  });
+
+  if(rows.length === 0){
+    tbody.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</td>
+      <td class="kind-${r.kind}">${r.kind === 'expense' ? 'Expense' : 'Saving'}</td>
+      <td>${r.category}</td>
+      <td>${r.who}</td>
+      <td>${r.detail}</td>
+      <td class="amt">${fmt(r.amount)}</td>
+      <td>
+        <button class="del" data-id="${r.id}" data-kind="${r.kind}" data-action="edit" aria-label="Edit entry">Edit</button>
+        <button class="del" data-id="${r.id}" data-kind="${r.kind}" data-action="delete" aria-label="Delete entry">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+    btn.addEventListener('click', () => startEdit(btn.dataset.kind, btn.dataset.id));
+  });
+
+  tbody.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if(!confirm('Delete this entry?')) return;
+      const id = btn.dataset.id;
+      try {
+        if(btn.dataset.kind === 'expense'){
+          await deleteExpenseTx(id);
+        } else {
+          await deleteSavingsTx(id);
+        }
+      } catch(err){
+        alert('Could not delete: ' + err.message);
+      }
+    });
+  });
+}
+
+document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if(tableSort.col === col){
+      tableSort.dir = tableSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      tableSort.col = col;
+      tableSort.dir = col === 'amount' ? 'desc' : 'asc';
+    }
+    renderTable();
+  });
+});
+
+['filter-type','filter-who','filter-category','filter-from','filter-to'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const rows = getFilteredSortedEntries();
+  const data = rows.map(r => ({
+    Date: new Date(r.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}),
+    Type: r.kind === 'expense' ? 'Expense' : 'Saving',
+    Category: r.category,
+    Who: r.who,
+    Detail: r.detail,
+    Amount: r.amount
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Entries');
+  XLSX.writeFile(wb, 'our-ledger-' + todayStr() + '.xlsx');
+});
