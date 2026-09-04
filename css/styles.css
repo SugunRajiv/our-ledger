@@ -66,8 +66,8 @@ h1{
 .stat .num{font-family:'Lora',serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;}
 
 .top-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:0.5rem;}
-.top-actions{display:flex;gap:6px;}
-.top-actions button{width:auto;margin-top:0;padding:4px 10px;font-size:12px;}
+.top-actions{display:flex;gap:10px;flex:1;}
+.top-actions button{width:auto;margin-top:0;padding:12px 22px;font-size:15px;flex:1;}
 
 .user-menu{position:relative;}
 .user-menu summary{
