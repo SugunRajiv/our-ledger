@@ -53,10 +53,13 @@
 </div>
 
 <div class="wrap" id="app-view" style="display:none;">
-  <div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem;">
+  <div class="top-row">
+    <div class="top-actions">
+      <button class="submit" type="button" id="open-expense-btn">+ Expense</button>
+      <button class="submit secondary" type="button" id="open-savings-btn">+ Savings</button>
+    </div>
     <button class="submit" style="width:auto;margin-top:0;padding:6px 14px;font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--line);" id="logout-btn">Sign out</button>
   </div>
-
 
   <h1>Our ledger</h1>
   <p class="sub">Shared household expenses.</p>
@@ -83,11 +86,6 @@
       <div class="num" id="budget-total" style="font-size:16px;">Not set</div>
       <div class="bar-bg" style="margin-top:8px;height:6px;"><div class="bar-fill" id="budget-bar" style="width:0%;"></div></div>
     </div>
-  </div>
-
-  <div class="action-row">
-    <button class="submit" type="button" id="open-expense-btn">+ Add expense</button>
-    <button class="submit secondary" type="button" id="open-savings-btn">+ Add savings</button>
   </div>
 
   <dialog class="modal" id="expense-dialog">
