@@ -7,17 +7,31 @@ function paginate(items, page){
   return { pageItems: items.slice(start, start + PAGE_SIZE), page: clamped, totalPages };
 }
 
-function renderPager(containerId, page, totalPages, onChange){
+function renderPager(containerId, page, totalPages, totalItems, onChange){
   const el = document.getElementById(containerId);
-  if(totalPages <= 1){
+  if(totalItems === 0){
     el.innerHTML = '';
     return;
   }
+
+  const start = (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, totalItems);
   const options = Array.from({length: totalPages}, (_, i) => i + 1)
     .map(p => `<option value="${p}"${p === page ? ' selected' : ''}>Page ${p} of ${totalPages}</option>`)
     .join('');
-  el.innerHTML = `<select class="pager-select">${options}</select>`;
-  el.querySelector('select').addEventListener('change', (e) => onChange(Number(e.target.value)));
+
+  el.innerHTML = `
+    <div class="pager-info">Showing ${start}–${end} of ${totalItems}</div>
+    <div class="pager-controls">
+      <button type="button" class="pager-btn" data-dir="prev" ${page <= 1 ? 'disabled' : ''} aria-label="Previous page">‹</button>
+      <select class="pager-select" ${totalPages <= 1 ? 'disabled' : ''}>${options}</select>
+      <button type="button" class="pager-btn" data-dir="next" ${page >= totalPages ? 'disabled' : ''} aria-label="Next page">›</button>
+    </div>
+  `;
+
+  el.querySelector('.pager-select').addEventListener('change', (e) => onChange(Number(e.target.value)));
+  el.querySelector('[data-dir="prev"]').addEventListener('click', () => { if(page > 1) onChange(page - 1); });
+  el.querySelector('[data-dir="next"]').addEventListener('click', () => { if(page < totalPages) onChange(page + 1); });
 }
 
 function render(){
@@ -139,7 +153,7 @@ function renderEntriesList(){
     });
   }
 
-  renderPager('entries-list-pager', entriesListPage, totalPages, (p) => {
+  renderPager('entries-list-pager', entriesListPage, totalPages, expenses.length, (p) => {
     entriesListPage = p;
     renderEntriesList();
   });
@@ -231,8 +245,10 @@ function renderTable(){
       <td>${r.detail}</td>
       <td class="amt">${fmt(r.amount)}</td>
       <td>
-        <button class="del" data-id="${r.id}" data-kind="${r.kind}" data-action="edit" aria-label="Edit entry">Edit</button>
-        <button class="del" data-id="${r.id}" data-kind="${r.kind}" data-action="delete" aria-label="Delete entry">Delete</button>
+        <div class="row-actions">
+          <button data-id="${r.id}" data-kind="${r.kind}" data-action="edit" aria-label="Edit entry">Edit</button>
+          <button data-id="${r.id}" data-kind="${r.kind}" data-action="delete" aria-label="Delete entry">Delete</button>
+        </div>
       </td>
     </tr>
   `).join('');
@@ -257,7 +273,7 @@ function renderTable(){
     });
   });
 
-  renderPager('table-pager', tablePage, totalPages, (p) => {
+  renderPager('table-pager', tablePage, totalPages, rows.length, (p) => {
     tablePage = p;
     renderTable();
   });

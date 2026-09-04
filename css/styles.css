@@ -273,8 +273,43 @@ input:focus, select:focus{outline:2px solid var(--teal);outline-offset:1px;}
 @media (max-width:600px){.chart-grid{grid-template-columns:1fr;}}
 .chart-block h3{font-size:13px;font-weight:600;margin:0 0 10px;color:var(--muted);}
 
-.pager{display:flex;justify-content:flex-end;margin-top:12px;}
-.pager select{width:auto;font-size:13px;padding:6px 8px;}
+.pager{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:14px;
+  padding:10px 16px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+.pager:empty{display:none;}
+.pager-info{font-size:13px;color:var(--muted);}
+.pager-controls{display:flex;align-items:center;gap:8px;}
+.pager-btn{
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:50%;
+  color:var(--ink);
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  font-family:inherit;
+  padding:0;
+}
+.pager-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal-dark);}
+.pager-btn:disabled{color:var(--line);border-color:var(--line);cursor:default;}
+.pager-select{
+  width:auto;
+  font-size:13px;
+  padding:6px 12px;
+  border-radius:20px;
+  background:var(--card);
+}
 
 .person-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;}
 .person-card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;}
@@ -307,6 +342,20 @@ input:focus, select:focus{outline:2px solid var(--teal);outline-offset:1px;}
 .data-table th, .data-table td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
 .data-table th{cursor:pointer;color:var(--muted);font-weight:600;user-select:none;}
 .data-table th.sorted{color:var(--ink);}
-.data-table td.amt{text-align:right;font-variant-numeric:tabular-nums;}
+.data-table th.amt, .data-table td.amt{text-align:right;font-variant-numeric:tabular-nums;}
+.data-table .row-actions{display:flex;gap:6px;}
+.data-table .row-actions button{
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--muted);
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:14px;
+  cursor:pointer;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.data-table .row-actions button:hover{color:var(--teal-dark);border-color:var(--teal);}
+.data-table .row-actions button[data-action="delete"]:hover{color:var(--danger);border-color:var(--danger);}
 .data-table .kind-expense{color:var(--danger);}
 .data-table .kind-savings{color:var(--teal-dark);}
