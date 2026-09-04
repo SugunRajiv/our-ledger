@@ -17,8 +17,22 @@ let tableSort = { col: 'date', dir: 'desc' };
 let db = null;
 let auth = null;
 
+const CURRENCIES = {
+  INR: { symbol: '₹', locale: 'en-IN' },
+  USD: { symbol: '$', locale: 'en-US' },
+  EUR: { symbol: '€', locale: 'en-IE' },
+  GBP: { symbol: '£', locale: 'en-GB' },
+};
+let currencyCode = 'INR';
+let languageCode = 'en';
+
+function currencySymbol(){
+  return (CURRENCIES[currencyCode] || CURRENCIES.INR).symbol;
+}
+
 function fmt(n){
-  return '₹' + Number(n).toLocaleString('en-IN', {maximumFractionDigits:0});
+  const c = CURRENCIES[currencyCode] || CURRENCIES.INR;
+  return c.symbol + Number(n).toLocaleString(c.locale, {maximumFractionDigits:0});
 }
 
 function todayStr(){

@@ -47,6 +47,15 @@ function attachListeners(){
     monthlyBudget = snap.val() || 0;
     render();
   });
+  db.ref('currency').on('value', snap => {
+    currencyCode = snap.val() || 'INR';
+    applyCurrencyToUI();
+    render();
+  });
+  db.ref('language').on('value', snap => {
+    languageCode = snap.val() || 'en';
+    document.getElementById('language-select').value = languageCode;
+  });
   db.ref('categories').on('value', snap => {
     categories = snap.val() || categories;
     populateSelect('category', categories);

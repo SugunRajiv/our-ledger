@@ -173,7 +173,7 @@ document.getElementById('save-amount').addEventListener('input', () => {
 });
 
 document.getElementById('edit-budget-btn').addEventListener('click', () => {
-  const val = prompt('Set monthly budget (₹). Enter 0 to clear.', monthlyBudget || '');
+  const val = prompt(`Set monthly budget (${currencySymbol()}). Enter 0 to clear.`, monthlyBudget || '');
   if(val === null) return;
   const num = parseFloat(val);
   if(isNaN(num) || num < 0){
