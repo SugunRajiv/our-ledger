@@ -55,6 +55,17 @@ function render(){
   document.getElementById('expense-overall-total').textContent = fmt(overallTotal);
   document.getElementById('expense-month-spend').textContent = fmt(monthTotal);
 
+  const overallLabelEl = document.getElementById('expense-overall-label');
+  if(expenses.length > 0){
+    const earliestDate = expenses.reduce((min, e) => {
+      const d = new Date(e.date);
+      return d < min ? d : min;
+    }, new Date(expenses[0].date));
+    overallLabelEl.textContent = `Overall spend (from ${earliestDate.toLocaleDateString('en-IN', {month:'long'})})`;
+  } else {
+    overallLabelEl.textContent = 'Overall spend';
+  }
+
   const budgetBar = document.getElementById('budget-bar');
   if(monthlyBudget > 0){
     document.getElementById('budget-total').textContent = fmt(monthTotal) + ' of ' + fmt(monthlyBudget);
