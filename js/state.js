@@ -60,3 +60,10 @@ function startOfMonth(d){
   dt.setHours(0,0,0,0);
   return dt;
 }
+
+function startOfYear(d){
+  const dt = new Date(d);
+  dt.setMonth(0, 1);
+  dt.setHours(0,0,0,0);
+  return dt;
+}

@@ -38,15 +38,22 @@ function render(){
   const now = new Date();
   const wkStart = startOfWeek(now);
   const moStart = startOfMonth(now);
+  const yrStart = startOfYear(now);
 
   const weekEntries = expenses.filter(e => new Date(e.date) >= wkStart);
   const monthEntries = expenses.filter(e => new Date(e.date) >= moStart);
+  const yearEntries = expenses.filter(e => new Date(e.date) >= yrStart);
 
   const weekTotal = weekEntries.reduce((s,e)=>s+e.amount,0);
   const monthTotal = monthEntries.reduce((s,e)=>s+e.amount,0);
+  const yearTotal = yearEntries.reduce((s,e)=>s+e.amount,0);
+  const overallTotal = expenses.reduce((s,e)=>s+e.amount,0);
 
   document.getElementById('week-total').textContent = fmt(weekTotal);
   document.getElementById('month-total').textContent = fmt(monthTotal);
+  document.getElementById('year-total').textContent = fmt(yearTotal);
+  document.getElementById('expense-overall-total').textContent = fmt(overallTotal);
+  document.getElementById('expense-month-spend').textContent = fmt(monthTotal);
 
   const budgetBar = document.getElementById('budget-bar');
   if(monthlyBudget > 0){
@@ -76,13 +83,17 @@ function render(){
   }
 
   const saveTotal = savings.reduce((s,e)=>s+e.amount,0);
+  const saveWeekTotal = savings.filter(e => new Date(e.date) >= wkStart).reduce((s,e)=>s+e.amount,0);
   const saveMonthTotal = savings.filter(e => new Date(e.date) >= moStart).reduce((s,e)=>s+e.amount,0);
   document.getElementById('save-total').textContent = fmt(saveTotal);
   document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
+  document.getElementById('top-save-month-total').textContent = fmt(saveMonthTotal);
+  document.getElementById('top-save-week-total').textContent = fmt(saveWeekTotal);
 
   renderTrendChart('savings-week-trend', currentWeekDailyBuckets(savings), 'var(--teal)');
-  renderTrendChart('savings-weekly-donut', last30DayWeeklyBuckets(savings), 'var(--teal)');
-  renderColorBars('save-cat-breakdown', lastMonthCategoryTotals(savings));
+  renderTrendChart('savings-weekly-donut', currentMonthWeeklyBuckets(savings), 'var(--teal)');
+  renderTrendChart('savings-6month-trend', last6MonthsBuckets(savings), 'var(--teal)');
+  renderColorBars('save-cat-breakdown', currentMonthCategoryTotals(savings));
 
   const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
   const personBox = document.getElementById('person-breakdown');
@@ -99,8 +110,9 @@ function render(){
   }).join('')}</div>`;
 
   renderTrendChart('expense-week-trend', currentWeekDailyBuckets(expenses), 'var(--ochre)');
-  renderColorBars('cat-breakdown', lastMonthCategoryTotals(expenses));
-  renderTrendChart('expense-weekly-donut', last30DayWeeklyBuckets(expenses), 'var(--ochre)');
+  renderColorBars('cat-breakdown', currentMonthCategoryTotals(expenses));
+  renderTrendChart('expense-weekly-donut', currentMonthWeeklyBuckets(expenses), 'var(--ochre)');
+  renderTrendChart('expense-6month-trend', last6MonthsBuckets(expenses), 'var(--ochre)');
 
   const payTotals = {};
   expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });

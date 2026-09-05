@@ -63,9 +63,14 @@ h1{
 }
 .banner.ok{border-left-color:var(--teal);}
 
-.stats{display:flex;gap:12px;margin-bottom:1.5rem;}
+.stat-group{margin-bottom:1.5rem;}
+.stat-group-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
+.stat-group .stats{margin-bottom:0;}
+
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem;}
 .stat{
   flex:1;
+  min-width:130px;
   background:var(--card);
   border:1px solid var(--line);
   border-radius:10px;
@@ -274,6 +279,9 @@ input:focus, select:focus{outline:2px solid var(--teal);outline-offset:1px;}
 .trend-dot{cursor:pointer;}
 .trend-value-label{font-size:9px;font-weight:600;fill:var(--ink);font-family:'Inter',sans-serif;}
 .trend-x-label{font-size:8px;fill:var(--muted);font-family:'Inter',sans-serif;}
+.trend-bar.trend-future{cursor:default;fill-opacity:0.6;}
+.trend-bar.trend-future:hover{fill-opacity:0.6;}
+.trend-future-label{fill:#CFCBBE;}
 
 .chart-tooltip{
   position:fixed;

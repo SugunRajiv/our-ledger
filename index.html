@@ -124,19 +124,40 @@
 
   <div id="banner" class="banner"></div>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="label">This week</div>
-      <div class="num" id="week-total">₹0</div>
+  <div class="stat-group">
+    <div class="stat-group-label">Expenses</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="label">This year</div>
+        <div class="num" id="year-total">₹0</div>
+      </div>
+      <div class="stat">
+        <div class="label">This month</div>
+        <div class="num" id="month-total">₹0</div>
+      </div>
+      <div class="stat">
+        <div class="label">This week</div>
+        <div class="num" id="week-total">₹0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Monthly budget <button type="button" class="link-btn" id="edit-budget-btn" style="font-size:11px;">Edit</button></div>
+        <div class="num" id="budget-total" style="font-size:16px;">Not set</div>
+        <div class="bar-bg" style="margin-top:8px;height:6px;"><div class="bar-fill" id="budget-bar" style="width:0%;"></div></div>
+      </div>
     </div>
-    <div class="stat">
-      <div class="label">This month</div>
-      <div class="num" id="month-total">₹0</div>
-    </div>
-    <div class="stat">
-      <div class="label">Monthly budget <button type="button" class="link-btn" id="edit-budget-btn" style="font-size:11px;">Edit</button></div>
-      <div class="num" id="budget-total" style="font-size:16px;">Not set</div>
-      <div class="bar-bg" style="margin-top:8px;height:6px;"><div class="bar-fill" id="budget-bar" style="width:0%;"></div></div>
+  </div>
+
+  <div class="stat-group">
+    <div class="stat-group-label">Savings</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="label">This month</div>
+        <div class="num" id="top-save-month-total">₹0</div>
+      </div>
+      <div class="stat">
+        <div class="label">This week</div>
+        <div class="num" id="top-save-week-total">₹0</div>
+      </div>
     </div>
   </div>
 
@@ -215,22 +236,36 @@
   <div class="dashboard">
     <div class="card span-2">
       <h2>Expense dashboard</h2>
+      <div class="stats" style="margin-bottom:1rem;">
+        <div class="stat">
+          <div class="label">Overall spend</div>
+          <div class="num" id="expense-overall-total">₹0</div>
+        </div>
+        <div class="stat">
+          <div class="label">This month</div>
+          <div class="num" id="expense-month-spend">₹0</div>
+        </div>
+      </div>
       <div class="chart-grid">
         <div class="chart-block">
           <h3>This week · day by day</h3>
           <div id="expense-week-trend"></div>
         </div>
         <div class="chart-block">
-          <h3>Category-wise · last 1 month</h3>
-          <div id="cat-breakdown"></div>
+          <h3>This month · week by week</h3>
+          <div id="expense-weekly-donut"></div>
         </div>
         <div class="chart-block">
-          <h3>Weekly breakdown · last 1 month</h3>
-          <div id="expense-weekly-donut"></div>
+          <h3>Last 6 months</h3>
+          <div id="expense-6month-trend"></div>
         </div>
         <div class="chart-block">
           <h3>By payment type</h3>
           <div id="pay-breakdown"><div class="empty">No entries yet.</div></div>
+        </div>
+        <div class="chart-block">
+          <h3>Category-wise · this month</h3>
+          <div id="cat-breakdown"></div>
         </div>
         <div class="chart-block">
           <h3>By person</h3>
@@ -257,11 +292,15 @@
           <div id="savings-week-trend"></div>
         </div>
         <div class="chart-block">
-          <h3>Weekly breakdown · last 1 month</h3>
+          <h3>This month · week by week</h3>
           <div id="savings-weekly-donut"></div>
         </div>
         <div class="chart-block">
-          <h3>Category-wise · last 1 month</h3>
+          <h3>Last 6 months</h3>
+          <div id="savings-6month-trend"></div>
+        </div>
+        <div class="chart-block">
+          <h3>Category-wise · this month</h3>
           <div id="save-cat-breakdown"></div>
         </div>
       </div>
