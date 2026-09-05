@@ -126,8 +126,11 @@ h1{
 .user-menu-panel label{margin-top:12px;}
 .user-menu-panel label:first-of-type{margin-top:0;}
 .user-menu-panel .hint{font-size:11px;color:var(--muted);margin-top:4px;}
-.user-menu-panel .submit{margin-top:16px;width:100%;}
-.user-menu-panel .divider{margin:16px 0 4px;}
+.user-menu-panel .submit{margin-top:0;width:100%;}
+.user-menu-panel .divider{margin:16px 0 12px;}
+.user-menu-panel .menu-item{margin-top:14px;}
+
+.menu-section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
 
 .menu-item{
   display:flex;justify-content:space-between;align-items:center;
