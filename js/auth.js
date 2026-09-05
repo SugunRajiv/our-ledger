@@ -52,9 +52,18 @@ function checkLoaded(){
 }
 
 function attachListeners(){
-  householdRef().onSnapshot(snap => {
+  detachListeners();
+
+  activeUnsubscribes.push(householdRef().onSnapshot(snap => {
     if(!snap.exists) return;
     const data = snap.data();
+
+    // Backfill for households created before ownerUid existed: the earliest
+    // member becomes the owner. Safe to run repeatedly - only fires once.
+    if(!data.ownerUid && Array.isArray(data.memberUids) && data.memberUids.length > 0){
+      householdRef().update({ ownerUid: data.memberUids[0] }).catch(() => {});
+    }
+
     categories = data.categories || categories;
     savingsCategories = data.savingsCategories || savingsCategories;
     payTypes = data.payTypes || payTypes;
@@ -76,13 +85,14 @@ function attachListeners(){
     applyCurrencyToUI();
     document.getElementById('language-select').value = languageCode;
     renderWhoButtons();
+    renderMembersList(data);
     render();
   }, () => {
     document.getElementById('login-error').style.display = 'block';
     auth.signOut();
-  });
+  }));
 
-  householdRef().collection('expenses').orderBy('date', 'desc').onSnapshot(snap => {
+  activeUnsubscribes.push(householdRef().collection('expenses').orderBy('date', 'desc').onSnapshot(snap => {
     expenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loadedExpenses = true;
     checkLoaded();
@@ -90,14 +100,14 @@ function attachListeners(){
   }, () => {
     document.getElementById('login-error').style.display = 'block';
     auth.signOut();
-  });
+  }));
 
-  householdRef().collection('savings').orderBy('date', 'desc').onSnapshot(snap => {
+  activeUnsubscribes.push(householdRef().collection('savings').orderBy('date', 'desc').onSnapshot(snap => {
     savings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loadedSavings = true;
     checkLoaded();
     render();
-  });
+  }));
 }
 
 document.getElementById('login-btn').addEventListener('click', () => {

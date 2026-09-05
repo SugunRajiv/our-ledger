@@ -20,6 +20,12 @@ let auth = null;
 let fs = null;
 let currentHouseholdId = null;
 let householdMembers = {};
+let activeUnsubscribes = [];
+
+function detachListeners(){
+  activeUnsubscribes.forEach(unsub => unsub());
+  activeUnsubscribes = [];
+}
 
 function householdRef(){
   return fs.collection('households').doc(currentHouseholdId);

@@ -22,6 +22,12 @@ service cloud.firestore {
       function isMember() {
         return request.auth != null && request.auth.uid in resource.data.memberUids;
       }
+      function isOwner() {
+        return request.auth != null && request.auth.uid == resource.data.ownerUid;
+      }
+      function touchesMembership() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasAny(['memberUids', 'members']);
+      }
 
       // Joining: a non-member may update a household doc ONLY to append their
       // own uid to memberUids, and change nothing else.
@@ -33,10 +39,34 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids']);
       }
 
+      // Leaving (any member removes themself) or the owner removing someone
+      // else: memberUids/members shrink by exactly one member, nothing else
+      // changes, and the household never drops to zero members.
+      function isLeavingOrOwnerRemoving() {
+        return request.auth != null
+          && request.resource.data.memberUids.size() == resource.data.memberUids.size() - 1
+          && request.resource.data.memberUids.size() > 0
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'members'])
+          && (
+            (isMember() && !(request.auth.uid in request.resource.data.memberUids))
+            || isOwner()
+          );
+      }
+
+      // Editing display names in the members map without changing who's a
+      // member at all (memberUids untouched).
+      function isRenamingMembers() {
+        return isMember()
+          && request.resource.data.memberUids == resource.data.memberUids
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']);
+      }
+
       allow get: if isMember();
       allow list: if false;
-      allow create: if request.auth != null && request.resource.data.memberUids == [request.auth.uid];
-      allow update: if isMember() || isJoining();
+      allow create: if request.auth != null
+        && request.resource.data.memberUids == [request.auth.uid]
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isJoining() || isLeavingOrOwnerRemoving() || isRenamingMembers() || (isMember() && !touchesMembership());
       allow delete: if false;
 
       match /expenses/{entryId} {

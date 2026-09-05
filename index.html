@@ -80,13 +80,7 @@
         <span class="user-name" id="user-name-label">Account</span>
       </summary>
       <div class="user-menu-panel">
-        <div class="menu-section-label">Household</div>
-        <div class="hint">Invite code — share this with anyone you want to join</div>
-        <div class="invite-code-row">
-          <code id="household-invite-code">------</code>
-          <button type="button" class="link-btn" id="copy-invite-code-btn">Copy</button>
-        </div>
-
+        <button type="button" class="menu-item" id="open-household-btn">Household</button>
         <button type="button" class="menu-item" id="open-customise-btn">Customise</button>
         <button type="button" class="menu-item" id="open-categories-btn">Categories &amp; payment types</button>
         <button type="button" class="menu-item" id="open-backup-btn">Backup &amp; restore</button>
@@ -104,6 +98,23 @@
     <button class="submit" type="button" id="open-expense-btn">+ Expense</button>
     <button class="submit secondary" type="button" id="open-savings-btn">+ Savings</button>
   </div>
+
+  <dialog class="modal" id="household-dialog">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>Household</h2>
+        <button type="button" class="modal-close" id="close-household-dialog" aria-label="Close">&times;</button>
+      </div>
+      <div class="hint">Invite code — share this with anyone you want to join</div>
+      <div class="invite-code-row">
+        <code id="household-invite-code">------</code>
+        <button type="button" class="link-btn" id="copy-invite-code-btn">Copy</button>
+      </div>
+
+      <h3 style="margin-top:1.25rem;">Members</h3>
+      <div id="household-members-list"></div>
+    </div>
+  </dialog>
 
   <dialog class="modal" id="customise-dialog">
     <div class="modal-inner">
