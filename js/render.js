@@ -60,9 +60,9 @@ function render(){
       const d = new Date(e.date);
       return d < min ? d : min;
     }, new Date(expenses[0].date));
-    overallLabelEl.textContent = `Overall spend (from ${earliestDate.toLocaleDateString('en-IN', {month:'long'})})`;
+    overallLabelEl.textContent = `Total (from ${earliestDate.toLocaleDateString('en-IN', {month:'long'})})`;
   } else {
-    overallLabelEl.textContent = 'Overall spend';
+    overallLabelEl.textContent = 'Total';
   }
 
   const budgetBar = document.getElementById('budget-bar');
@@ -95,7 +95,9 @@ function render(){
   const saveTotal = savings.reduce((s,e)=>s+e.amount,0);
   const saveWeekTotal = savings.filter(e => new Date(e.date) >= wkStart).reduce((s,e)=>s+e.amount,0);
   const saveMonthTotal = savings.filter(e => new Date(e.date) >= moStart).reduce((s,e)=>s+e.amount,0);
+  const saveYearTotal = savings.filter(e => new Date(e.date) >= yrStart).reduce((s,e)=>s+e.amount,0);
   document.getElementById('save-total').textContent = fmt(saveTotal);
+  document.getElementById('save-year-total').textContent = fmt(saveYearTotal);
   document.getElementById('top-save-month-total').textContent = fmt(saveMonthTotal);
   document.getElementById('top-save-week-total').textContent = fmt(saveWeekTotal);
 
@@ -105,9 +107,9 @@ function render(){
       const d = new Date(e.date);
       return d < min ? d : min;
     }, new Date(savings[0].date));
-    saveTotalLabelEl.textContent = `Total saved (from ${earliestSaveDate.toLocaleDateString('en-IN', {month:'long'})})`;
+    saveTotalLabelEl.textContent = `Total (from ${earliestSaveDate.toLocaleDateString('en-IN', {month:'long'})})`;
   } else {
-    saveTotalLabelEl.textContent = 'Total saved';
+    saveTotalLabelEl.textContent = 'Total';
   }
 
   renderTrendChart('savings-week-trend', currentWeekDailyBuckets(savings), 'var(--teal)');
