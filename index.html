@@ -8,6 +8,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Our Ledger">
 <link rel="stylesheet" href="css/styles.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -39,6 +42,9 @@
       <button type="button" class="link-btn" id="toggle-mode-btn">Create an account</button>
       <button type="button" class="link-btn" id="forgot-btn">Forgot password?</button>
     </div>
+
+    <button type="button" class="submit secondary" id="install-app-btn" style="display:none;margin-top:10px;">Install app</button>
+    <p class="hint" id="ios-install-hint" style="display:none;text-align:center;">On iPhone/iPad: tap the Share icon, then "Add to Home Screen".</p>
   </div>
 </div>
 
