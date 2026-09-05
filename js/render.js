@@ -162,22 +162,9 @@ function renderEntriesList(){
           <div>${e.category}${e.note ? ' — ' + e.note : ''}</div>
           <div class="meta">${new Date(e.date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})} · ${e.who}${e.type ? ' · ' + e.type : ''}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <div class="amt">${fmt(e.amount)}</div>
-          <button class="del" data-id="${e.id}" aria-label="Delete entry">Delete</button>
-        </div>
+        <div class="amt">${fmt(e.amount)}</div>
       </div>
     `).join('');
-    list.querySelectorAll('.del').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if(!confirm('Delete this entry?')) return;
-        try {
-          await deleteExpenseTx(btn.dataset.id);
-        } catch(err){
-          alert('Could not delete: ' + err.message);
-        }
-      });
-    });
   }
 
   renderPager('entries-list-pager', entriesListPage, totalPages, expenses.length, (p) => {

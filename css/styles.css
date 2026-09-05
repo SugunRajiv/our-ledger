@@ -265,11 +265,6 @@ input:focus, select:focus{outline:2px solid var(--teal);outline-offset:1px;}
 .entry:last-child{border-bottom:none;}
 .entry .meta{color:var(--muted);font-size:12px;margin-top:2px;}
 .entry .amt{font-variant-numeric:tabular-nums;font-weight:500;}
-.entry .del{
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  font-size:13px;padding:4px 8px;font-family:inherit;
-}
-.entry .del:hover{color:var(--danger);}
 
 .empty{color:var(--muted);font-size:14px;padding:8px 0;}
 
