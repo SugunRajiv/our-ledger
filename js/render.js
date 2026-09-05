@@ -53,7 +53,6 @@ function render(){
   document.getElementById('month-total').textContent = fmt(monthTotal);
   document.getElementById('year-total').textContent = fmt(yearTotal);
   document.getElementById('expense-overall-total').textContent = fmt(overallTotal);
-  document.getElementById('expense-month-spend').textContent = fmt(monthTotal);
 
   const overallLabelEl = document.getElementById('expense-overall-label');
   if(expenses.length > 0){
@@ -97,7 +96,6 @@ function render(){
   const saveWeekTotal = savings.filter(e => new Date(e.date) >= wkStart).reduce((s,e)=>s+e.amount,0);
   const saveMonthTotal = savings.filter(e => new Date(e.date) >= moStart).reduce((s,e)=>s+e.amount,0);
   document.getElementById('save-total').textContent = fmt(saveTotal);
-  document.getElementById('save-month-total').textContent = fmt(saveMonthTotal);
   document.getElementById('top-save-month-total').textContent = fmt(saveMonthTotal);
   document.getElementById('top-save-week-total').textContent = fmt(saveWeekTotal);
 
@@ -121,19 +119,38 @@ function render(){
   savings.forEach(e => { const t = e.type || 'Other'; savePayTotals[t] = (savePayTotals[t]||0) + e.amount; });
   renderColorBars('save-pay-breakdown', Object.entries(savePayTotals).map(([label, value]) => ({ label, value })));
 
-  const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
+  const people = Array.from(new Set([
+    ...Object.values(householdMembers).map(m => m.displayName),
+    ...expenses.map(e => e.who),
+    ...savings.map(e => e.who)
+  ])).filter(Boolean);
+  const personTotals = people.map(p => ({
+    name: p,
+    spent: expenses.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0),
+    saved: savings.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0)
+  }));
+  const personMax = Math.max(1, ...personTotals.flatMap(p => [p.spent, p.saved]));
+
   const personBox = document.getElementById('person-breakdown');
-  personBox.innerHTML = `<div class="person-grid">${people.map(p => {
-    const expTotal = expenses.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
-    const savTotal = savings.filter(e=>e.who===p).reduce((s,e)=>s+e.amount,0);
-    return `
-      <div class="person-card">
-        <div class="pname">${p}</div>
-        <div class="prow"><span class="plabel">Spent</span><span class="pval">${fmt(expTotal)}</span></div>
-        <div class="prow"><span class="plabel">Saved</span><span class="pval">${fmt(savTotal)}</span></div>
+  personBox.innerHTML = `<div class="person-grid">${personTotals.map(p => `
+    <div class="person-card">
+      <div class="pname">${p.name}</div>
+      <div class="cbar-row">
+        <span class="cbar-dot" style="background:var(--ochre)"></span>
+        <div class="cbar-body">
+          <div class="cbar-top"><span class="cbar-label">Spent</span><span class="cbar-val">${fmt(p.spent)}</span></div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:${Math.round(p.spent / personMax * 100)}%;background:var(--ochre)"></div></div>
+        </div>
       </div>
-    `;
-  }).join('')}</div>`;
+      <div class="cbar-row">
+        <span class="cbar-dot" style="background:var(--teal)"></span>
+        <div class="cbar-body">
+          <div class="cbar-top"><span class="cbar-label">Saved</span><span class="cbar-val">${fmt(p.saved)}</span></div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:${Math.round(p.saved / personMax * 100)}%;background:var(--teal)"></div></div>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
 
   renderTrendChart('expense-week-trend', currentWeekDailyBuckets(expenses), 'var(--ochre)');
   renderColorBars('cat-breakdown', currentMonthCategoryTotals(expenses));
