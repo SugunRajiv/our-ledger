@@ -105,8 +105,22 @@ function hideChartTooltip(){
   if(tt) tt.style.display = 'none';
 }
 
-/* Colorful ranked horizontal bars — for category / payment-type breakdowns */
-function renderColorBars(containerId, items){
+function polarToCartesian(cx, cy, radius, angleDeg){
+  const rad = angleDeg * Math.PI / 180;
+  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+}
+
+function donutSlicePath(cx, cy, outerR, innerR, startAngle, endAngle){
+  const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+  const p1 = polarToCartesian(cx, cy, outerR, startAngle);
+  const p2 = polarToCartesian(cx, cy, outerR, endAngle);
+  const p3 = polarToCartesian(cx, cy, innerR, endAngle);
+  const p4 = polarToCartesian(cx, cy, innerR, startAngle);
+  return `M ${p1.x} ${p1.y} A ${outerR} ${outerR} 0 ${largeArc} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${innerR} ${innerR} 0 ${largeArc} 0 ${p4.x} ${p4.y} Z`;
+}
+
+/* Donut chart + legend — for category / payment-type share-of-whole breakdowns */
+function renderDonutChart(containerId, items){
   const container = document.getElementById(containerId);
   let data = items.filter(d => d.value > 0).sort((a,b) => b.value - a.value);
 
@@ -115,30 +129,58 @@ function renderColorBars(containerId, items){
     return;
   }
 
-  const maxBars = 7;
-  if(data.length > maxBars){
-    const head = data.slice(0, maxBars - 1);
-    const tailTotal = data.slice(maxBars - 1).reduce((s,d) => s + d.value, 0);
+  const maxSlices = 7;
+  if(data.length > maxSlices){
+    const head = data.slice(0, maxSlices - 1);
+    const tailTotal = data.slice(maxSlices - 1).reduce((s,d) => s + d.value, 0);
     data = head.concat([{ label: 'Other', value: tailTotal }]);
   }
 
-  const max = data[0].value;
-  container.innerHTML = data.map((d, i) => {
+  const total = data.reduce((s,d) => s + d.value, 0);
+  const cx = 60, cy = 60, outerR = 55, innerR = 32;
+  let angle = -90;
+
+  const slices = data.map((d, i) => {
+    const pct = d.value / total;
+    const startAngle = angle;
+    const endAngle = angle + pct * 360;
+    angle = endAngle;
     const color = d.label === 'Other' ? CHART_OTHER_COLOR : CHART_COLORS[i % CHART_COLORS.length];
-    const pct = Math.max(4, Math.round(d.value / max * 100));
-    return `
-      <div class="cbar-row">
-        <span class="cbar-dot" style="background:${color}"></span>
-        <div class="cbar-body">
-          <div class="cbar-top">
-            <span class="cbar-label">${d.label}</span>
-            <span class="cbar-val">${fmt(d.value)}</span>
-          </div>
-          <div class="cbar-track"><div class="cbar-fill" style="width:${pct}%;background:${color}"></div></div>
+    return { ...d, pct, startAngle, endAngle, color };
+  });
+
+  const svgSlices = slices.map(s => {
+    if(s.pct >= 0.999){
+      return `<circle cx="${cx}" cy="${cy}" r="${(outerR+innerR)/2}" fill="none" stroke="${s.color}" stroke-width="${outerR-innerR}" class="donut-slice" data-label="${s.label}" data-value="${s.value}"></circle>`;
+    }
+    return `<path d="${donutSlicePath(cx, cy, outerR, innerR, s.startAngle, s.endAngle)}" fill="${s.color}" class="donut-slice" data-label="${s.label}" data-value="${s.value}"></path>`;
+  }).join('');
+
+  const legendRows = slices.map(s => `
+    <div class="cbar-row">
+      <span class="cbar-dot" style="background:${s.color}"></span>
+      <div class="cbar-body">
+        <div class="cbar-top">
+          <span class="cbar-label">${s.label}</span>
+          <span class="cbar-val">${fmt(s.value)} · ${Math.round(s.pct * 100)}%</span>
         </div>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="donut-wrap">
+      <svg class="donut-svg" viewBox="0 0 120 120">${svgSlices}</svg>
+      <div class="donut-legend">${legendRows}</div>
+    </div>
+  `;
+
+  container.querySelectorAll('.donut-slice').forEach(el => {
+    el.addEventListener('pointermove', (e) => {
+      showChartTooltip(e.clientX, e.clientY, fmt(Number(el.dataset.value)), el.dataset.label);
+    });
+    el.addEventListener('pointerleave', hideChartTooltip);
+  });
 }
 
 /* Bar + trend-line combo chart — for weekly/monthly period breakdowns.

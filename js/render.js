@@ -115,11 +115,11 @@ function render(){
   renderTrendChart('savings-week-trend', currentWeekDailyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-weekly-donut', currentMonthWeeklyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-6month-trend', last6MonthsBuckets(savings), 'var(--teal)');
-  renderColorBars('save-cat-breakdown', currentMonthCategoryTotals(savings));
+  renderDonutChart('save-cat-breakdown', currentMonthCategoryTotals(savings));
 
   const savePayTotals = {};
   savings.forEach(e => { const t = e.type || 'Other'; savePayTotals[t] = (savePayTotals[t]||0) + e.amount; });
-  renderColorBars('save-pay-breakdown', Object.entries(savePayTotals).map(([label, value]) => ({ label, value })));
+  renderDonutChart('save-pay-breakdown', Object.entries(savePayTotals).map(([label, value]) => ({ label, value })));
 
   const people = Array.from(new Set([
     ...Object.values(householdMembers).map(m => m.displayName),
@@ -155,13 +155,13 @@ function render(){
   `).join('')}</div>`;
 
   renderTrendChart('expense-week-trend', currentWeekDailyBuckets(expenses), 'var(--ochre)');
-  renderColorBars('cat-breakdown', currentMonthCategoryTotals(expenses));
+  renderDonutChart('cat-breakdown', currentMonthCategoryTotals(expenses));
   renderTrendChart('expense-weekly-donut', currentMonthWeeklyBuckets(expenses), 'var(--ochre)');
   renderTrendChart('expense-6month-trend', last6MonthsBuckets(expenses), 'var(--ochre)');
 
   const payTotals = {};
   expenses.forEach(e => { const t = e.type || 'Other'; payTotals[t] = (payTotals[t]||0) + e.amount; });
-  renderColorBars('pay-breakdown', Object.entries(payTotals).map(([label, value]) => ({ label, value })));
+  renderDonutChart('pay-breakdown', Object.entries(payTotals).map(([label, value]) => ({ label, value })));
 
   renderEntriesList();
   renderTable();

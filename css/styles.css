@@ -292,6 +292,13 @@ input:focus, select:focus, textarea:focus{outline:2px solid var(--teal);outline-
 .trend-bar.trend-future:hover{fill-opacity:0.6;}
 .trend-future-label{fill:#CFCBBE;}
 
+.donut-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.donut-svg{width:120px;height:120px;flex-shrink:0;}
+.donut-slice{cursor:pointer;transition:opacity .15s;}
+.donut-slice:hover{opacity:0.82;}
+.donut-legend{flex:1;min-width:140px;}
+.donut-legend .cbar-row{padding:4px 0;}
+
 .chart-tooltip{
   position:fixed;
   pointer-events:none;
@@ -349,7 +356,7 @@ input:focus, select:focus, textarea:focus{outline:2px solid var(--teal);outline-
   background:var(--card);
 }
 
-.person-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;}
+.person-grid{display:flex;flex-direction:column;gap:12px;}
 .person-card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;}
 .person-card .pname{font-family:'Lora',serif;font-weight:600;font-size:15px;margin-bottom:4px;}
 .person-card .cbar-row{padding:4px 0;}
