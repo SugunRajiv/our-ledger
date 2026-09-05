@@ -5,7 +5,6 @@ const ADD_NEW = '__add_new__';
 const firebaseConfig = {
   apiKey: "AIzaSyBXrrnqrvT-YSXn6UxdHOyRk-JCqCTnQT8",
   authDomain: "our-finance-ledger.firebaseapp.com",
-  databaseURL: "https://our-finance-ledger-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "our-finance-ledger",
   storageBucket: "our-finance-ledger.firebasestorage.app",
   messagingSenderId: "242323395613",
