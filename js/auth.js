@@ -46,6 +46,7 @@ function attachListeners(){
   });
   db.ref('budget').on('value', snap => {
     monthlyBudget = snap.val() || 0;
+    applyBudgetToUI();
     render();
   });
   db.ref('currency').on('value', snap => {

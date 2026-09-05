@@ -172,16 +172,6 @@ document.getElementById('save-amount').addEventListener('input', () => {
   document.getElementById('save-error-msg').style.display = 'none';
 });
 
-document.getElementById('edit-budget-btn').addEventListener('click', () => {
-  const val = prompt(`Set monthly budget (${currencySymbol()}). Enter 0 to clear.`, monthlyBudget || '');
-  if(val === null) return;
-  const num = parseFloat(val);
-  if(isNaN(num) || num < 0){
-    alert('Enter a valid, non-negative number.');
-    return;
-  }
-  db.ref('budget').set(num).catch(err => alert('Could not save budget: ' + err.message));
-});
 
 document.getElementById('backup-btn').addEventListener('click', () => {
   const backup = {

@@ -16,8 +16,17 @@ function applyCurrencyToUI(){
   const label = `Amount (${currencySymbol()})`;
   document.getElementById('amount-label').textContent = label;
   document.getElementById('save-amount-label').textContent = label;
+  document.getElementById('budget-input-label').textContent = `Monthly budget (${currencySymbol()})`;
 }
 applyCurrencyToUI();
+
+function applyBudgetToUI(){
+  const el = document.getElementById('budget-input');
+  if(document.activeElement !== el){
+    el.value = monthlyBudget || '';
+  }
+}
+applyBudgetToUI();
 
 document.getElementById('currency-select').addEventListener('change', (e) => {
   currencyCode = e.target.value;
@@ -29,6 +38,18 @@ document.getElementById('currency-select').addEventListener('change', (e) => {
 document.getElementById('language-select').addEventListener('change', (e) => {
   languageCode = e.target.value;
   db.ref('language').set(languageCode).catch(err => alert('Could not save language: ' + err.message));
+});
+
+document.getElementById('budget-input').addEventListener('change', (e) => {
+  const val = e.target.value.trim();
+  const num = val === '' ? 0 : parseFloat(val);
+  if(isNaN(num) || num < 0){
+    alert('Enter a valid, non-negative number.');
+    applyBudgetToUI();
+    return;
+  }
+  monthlyBudget = num;
+  db.ref('budget').set(num).catch(err => alert('Could not save budget: ' + err.message));
 });
 
 document.addEventListener('click', (e) => {
