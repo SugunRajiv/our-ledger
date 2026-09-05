@@ -4,15 +4,23 @@ function ensureOptionPresent(selectId, list, value){
 }
 
 async function saveCategories(){
-  await db.ref('categories').set(categories);
+  await householdRef().update({ categories });
 }
 
 async function saveSaveCategories(){
-  await db.ref('save_categories').set(savingsCategories);
+  await householdRef().update({ savingsCategories });
 }
 
 async function savePayTypes(){
-  await db.ref('paytypes').set(payTypes);
+  await householdRef().update({ payTypes });
+}
+
+async function renameFieldAcrossCollection(collectionName, field, oldValue, newValue){
+  const snap = await householdRef().collection(collectionName).where(field, '==', oldValue).get();
+  if(snap.empty) return;
+  const batch = fs.batch();
+  snap.docs.forEach(doc => batch.update(doc.ref, { [field]: newValue }));
+  await batch.commit();
 }
 
 function populateSelect(id, list){
@@ -54,14 +62,14 @@ async function editListItem(kind, oldName){
     await saveCategories();
     populateSelect('category', categories);
     renderManageList('manage-categories', categories, 'category');
-    await txUpdateArray(db.ref('expenses'), arr => arr.map(e => (e && e.category === oldName) ? {...e, category: clean} : e));
+    await renameFieldAcrossCollection('expenses', 'category', oldName, clean);
   } else if(kind === 'save-category'){
     if(savingsCategories.includes(clean)){ alert('That category already exists.'); return; }
     savingsCategories = savingsCategories.map(c => c === oldName ? clean : c);
     await saveSaveCategories();
     populateSelect('save-category', savingsCategories);
     renderManageList('manage-save-categories', savingsCategories, 'save-category');
-    await txUpdateArray(db.ref('savings'), arr => arr.map(e => (e && e.category === oldName) ? {...e, category: clean} : e));
+    await renameFieldAcrossCollection('savings', 'category', oldName, clean);
   } else if(kind === 'paytype'){
     if(payTypes.includes(clean)){ alert('That payment type already exists.'); return; }
     payTypes = payTypes.map(t => t === oldName ? clean : t);
@@ -69,8 +77,8 @@ async function editListItem(kind, oldName){
     populateSelect('paytype', payTypes);
     populateSelect('save-paytype', payTypes);
     renderManageList('manage-paytypes', payTypes, 'paytype');
-    await txUpdateArray(db.ref('expenses'), arr => arr.map(e => (e && e.type === oldName) ? {...e, type: clean} : e));
-    await txUpdateArray(db.ref('savings'), arr => arr.map(e => (e && e.type === oldName) ? {...e, type: clean} : e));
+    await renameFieldAcrossCollection('expenses', 'type', oldName, clean);
+    await renameFieldAcrossCollection('savings', 'type', oldName, clean);
   }
 }
 

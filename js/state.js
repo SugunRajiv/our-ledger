@@ -16,8 +16,14 @@ let tableSort = { col: 'date', dir: 'desc' };
 let entriesListPage = 1;
 let tablePage = 1;
 
-let db = null;
 let auth = null;
+let fs = null;
+let currentHouseholdId = null;
+let householdMembers = {};
+
+function householdRef(){
+  return fs.collection('households').doc(currentHouseholdId);
+}
 
 const CURRENCIES = {
   INR: { symbol: '₹', locale: 'en-IN' },

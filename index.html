@@ -10,8 +10,8 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="css/styles.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -52,6 +52,26 @@
   </div>
 </div>
 
+<div class="wrap" id="setup-view" style="display:none;">
+  <h1>Our ledger</h1>
+  <p class="sub">Set up your household to get started.</p>
+  <div class="card">
+    <label for="household-name-input">Household name</label>
+    <input type="text" id="household-name-input" placeholder="e.g. The Basireddys">
+    <div class="error" id="create-household-error"></div>
+    <button class="submit" id="create-household-btn">Create household</button>
+
+    <div class="divider"><span>or</span></div>
+
+    <label for="invite-code-input">Invite code</label>
+    <input type="text" id="invite-code-input" placeholder="ABCD12" style="text-transform:uppercase;">
+    <div class="error" id="join-household-error"></div>
+    <button class="submit secondary" id="join-household-btn">Join household</button>
+
+    <button class="submit secondary" id="setup-logout-btn" style="margin-top:10px;">Sign out</button>
+  </div>
+</div>
+
 <div class="wrap" id="app-view" style="display:none;">
   <div class="account-row">
     <details class="user-menu" id="user-menu">
@@ -60,6 +80,13 @@
         <span class="user-name" id="user-name-label">Account</span>
       </summary>
       <div class="user-menu-panel">
+        <div class="menu-section-label">Household</div>
+        <div class="hint">Invite code — share this with anyone you want to join</div>
+        <div class="invite-code-row">
+          <code id="household-invite-code">------</code>
+          <button type="button" class="link-btn" id="copy-invite-code-btn">Copy</button>
+        </div>
+
         <div class="menu-section-label">Customise</div>
 
         <label for="currency-select">Currency</label>
@@ -400,6 +427,7 @@
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/household.js"></script>
 <script src="js/categories.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/dialogs.js"></script>

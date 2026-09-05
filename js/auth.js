@@ -4,8 +4,8 @@ function initFirebase(){
     return;
   }
   firebase.initializeApp(firebaseConfig);
-  db = firebase.database();
   auth = firebase.auth();
+  fs = firebase.firestore();
 
   auth.onAuthStateChanged(user => {
     const isUnverifiedPassword = user && !user.emailVerified &&
@@ -13,13 +13,36 @@ function initFirebase(){
 
     document.getElementById('login-view').style.display = (user) ? 'none' : 'block';
     document.getElementById('verify-view').style.display = isUnverifiedPassword ? 'block' : 'none';
-    document.getElementById('app-view').style.display = (user && !isUnverifiedPassword) ? 'block' : 'none';
 
     if(user && !isUnverifiedPassword){
-      attachListeners();
       updateUserBadge(user);
+      resolveHousehold(user);
+    } else {
+      document.getElementById('setup-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'none';
     }
   });
+}
+
+async function resolveHousehold(user){
+  document.getElementById('setup-view').style.display = 'none';
+  document.getElementById('app-view').style.display = 'none';
+  document.getElementById('loading-banner').style.display = 'block';
+
+  try {
+    const userDoc = await fs.collection('users').doc(user.uid).get();
+    if(userDoc.exists && userDoc.data().householdId){
+      currentHouseholdId = userDoc.data().householdId;
+      document.getElementById('app-view').style.display = 'block';
+      attachListeners();
+    } else {
+      document.getElementById('loading-banner').style.display = 'none';
+      document.getElementById('setup-view').style.display = 'block';
+    }
+  } catch(err){
+    document.getElementById('loading-banner').style.display = 'none';
+    alert('Could not load your account: ' + err.message);
+  }
 }
 
 function checkLoaded(){
@@ -29,8 +52,38 @@ function checkLoaded(){
 }
 
 function attachListeners(){
-  db.ref('expenses').on('value', snap => {
-    expenses = snap.val() || [];
+  householdRef().onSnapshot(snap => {
+    if(!snap.exists) return;
+    const data = snap.data();
+    categories = data.categories || categories;
+    savingsCategories = data.savingsCategories || savingsCategories;
+    payTypes = data.payTypes || payTypes;
+    monthlyBudget = data.monthlyBudget || 0;
+    currencyCode = data.currency || 'INR';
+    languageCode = data.language || 'en';
+    householdMembers = data.members || {};
+    document.getElementById('household-invite-code').textContent = data.inviteCode || '------';
+
+    populateSelect('category', categories);
+    renderManageList('manage-categories', categories, 'category');
+    populateSelect('save-category', savingsCategories);
+    renderManageList('manage-save-categories', savingsCategories, 'save-category');
+    populateSelect('paytype', payTypes);
+    populateSelect('save-paytype', payTypes);
+    renderManageList('manage-paytypes', payTypes, 'paytype');
+
+    applyBudgetToUI();
+    applyCurrencyToUI();
+    document.getElementById('language-select').value = languageCode;
+    renderWhoButtons();
+    render();
+  }, () => {
+    document.getElementById('login-error').style.display = 'block';
+    auth.signOut();
+  });
+
+  householdRef().collection('expenses').orderBy('date', 'desc').onSnapshot(snap => {
+    expenses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loadedExpenses = true;
     checkLoaded();
     render();
@@ -38,41 +91,12 @@ function attachListeners(){
     document.getElementById('login-error').style.display = 'block';
     auth.signOut();
   });
-  db.ref('savings').on('value', snap => {
-    savings = snap.val() || [];
+
+  householdRef().collection('savings').orderBy('date', 'desc').onSnapshot(snap => {
+    savings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     loadedSavings = true;
     checkLoaded();
     render();
-  });
-  db.ref('budget').on('value', snap => {
-    monthlyBudget = snap.val() || 0;
-    applyBudgetToUI();
-    render();
-  });
-  db.ref('currency').on('value', snap => {
-    currencyCode = snap.val() || 'INR';
-    applyCurrencyToUI();
-    render();
-  });
-  db.ref('language').on('value', snap => {
-    languageCode = snap.val() || 'en';
-    document.getElementById('language-select').value = languageCode;
-  });
-  db.ref('categories').on('value', snap => {
-    categories = snap.val() || categories;
-    populateSelect('category', categories);
-    renderManageList('manage-categories', categories, 'category');
-  });
-  db.ref('save_categories').on('value', snap => {
-    savingsCategories = snap.val() || savingsCategories;
-    populateSelect('save-category', savingsCategories);
-    renderManageList('manage-save-categories', savingsCategories, 'save-category');
-  });
-  db.ref('paytypes').on('value', snap => {
-    payTypes = snap.val() || payTypes;
-    populateSelect('paytype', payTypes);
-    populateSelect('save-paytype', payTypes);
-    renderManageList('manage-paytypes', payTypes, 'paytype');
   });
 }
 

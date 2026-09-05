@@ -1,24 +1,20 @@
-function txUpdateArray(ref, mutator){
-  return ref.transaction(current => mutator(current || []));
-}
-
 function addExpenseTx(entry){
-  return txUpdateArray(db.ref('expenses'), arr => { arr.unshift(entry); return arr; });
+  return householdRef().collection('expenses').add(entry);
 }
 function updateExpenseTx(id, updated){
-  return txUpdateArray(db.ref('expenses'), arr => arr.map(e => (e && e.id === id) ? updated : e));
+  return householdRef().collection('expenses').doc(id).update(updated);
 }
 function deleteExpenseTx(id){
-  return txUpdateArray(db.ref('expenses'), arr => arr.filter(e => e && e.id !== id));
+  return householdRef().collection('expenses').doc(id).delete();
 }
 function addSavingsTx(entry){
-  return txUpdateArray(db.ref('savings'), arr => { arr.unshift(entry); return arr; });
+  return householdRef().collection('savings').add(entry);
 }
 function updateSavingsTx(id, updated){
-  return txUpdateArray(db.ref('savings'), arr => arr.map(e => (e && e.id === id) ? updated : e));
+  return householdRef().collection('savings').doc(id).update(updated);
 }
 function deleteSavingsTx(id){
-  return txUpdateArray(db.ref('savings'), arr => arr.filter(e => e && e.id !== id));
+  return householdRef().collection('savings').doc(id).delete();
 }
 
 function startEdit(kind, id){
@@ -75,22 +71,6 @@ function cancelEditSavings(){
   document.getElementById('save-date').value = todayStr();
 }
 
-document.querySelectorAll('#exp-who button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#exp-who button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentWho = btn.dataset.who;
-  });
-});
-
-document.querySelectorAll('#save-who button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#save-who button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentSaveWho = btn.dataset.who;
-  });
-});
-
 document.getElementById('add-btn').addEventListener('click', async () => {
   const amountEl = document.getElementById('amount');
   const errorEl = document.getElementById('error-msg');
@@ -108,7 +88,6 @@ document.getElementById('add-btn').addEventListener('click', async () => {
   const dateVal = document.getElementById('date').value || todayStr();
 
   const entry = {
-    id: editingExpenseId || (Date.now().toString(36) + Math.random().toString(36).slice(2,6)),
     amount, category, type, note, who: currentWho,
     date: new Date(dateVal + 'T12:00:00').toISOString()
   };
@@ -148,7 +127,6 @@ document.getElementById('save-add-btn').addEventListener('click', async () => {
   const type = document.getElementById('save-paytype').value;
   const dateVal = document.getElementById('save-date').value || todayStr();
   const entry = {
-    id: editingSavingsId || (Date.now().toString(36) + Math.random().toString(36).slice(2,6)),
     amount, category, type, note, who: currentSaveWho,
     date: new Date(dateVal + 'T12:00:00').toISOString()
   };
@@ -217,12 +195,33 @@ document.getElementById('restore-input').addEventListener('change', async (e) =>
   }
 
   try {
-    await db.ref('expenses').set(data.expenses);
-    await db.ref('savings').set(data.savings);
-    if(Array.isArray(data.categories)) await db.ref('categories').set(data.categories);
-    if(Array.isArray(data.savingsCategories)) await db.ref('save_categories').set(data.savingsCategories);
-    if(Array.isArray(data.payTypes)) await db.ref('paytypes').set(data.payTypes);
-    if(typeof data.budget === 'number') await db.ref('budget').set(data.budget);
+    const expCol = householdRef().collection('expenses');
+    const savCol = householdRef().collection('savings');
+    const [existingExp, existingSav] = await Promise.all([expCol.get(), savCol.get()]);
+
+    let batch = fs.batch();
+    let opCount = 0;
+    const flushIfFull = async () => {
+      if(opCount >= 450){
+        await batch.commit();
+        batch = fs.batch();
+        opCount = 0;
+      }
+    };
+
+    for(const doc of existingExp.docs){ batch.delete(doc.ref); opCount++; await flushIfFull(); }
+    for(const doc of existingSav.docs){ batch.delete(doc.ref); opCount++; await flushIfFull(); }
+    for(const entry of data.expenses){ const { id, ...rest } = entry; batch.set(expCol.doc(), rest); opCount++; await flushIfFull(); }
+    for(const entry of data.savings){ const { id, ...rest } = entry; batch.set(savCol.doc(), rest); opCount++; await flushIfFull(); }
+    await batch.commit();
+
+    const householdUpdate = {};
+    if(Array.isArray(data.categories)) householdUpdate.categories = data.categories;
+    if(Array.isArray(data.savingsCategories)) householdUpdate.savingsCategories = data.savingsCategories;
+    if(Array.isArray(data.payTypes)) householdUpdate.payTypes = data.payTypes;
+    if(typeof data.budget === 'number') householdUpdate.monthlyBudget = data.budget;
+    if(Object.keys(householdUpdate).length) await householdRef().update(householdUpdate);
+
     alert('Backup restored.');
   } catch(err){
     alert('Could not restore backup: ' + err.message);

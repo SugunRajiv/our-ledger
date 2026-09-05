@@ -131,6 +131,16 @@ h1{
 .user-menu-panel .menu-item{margin-top:14px;}
 
 .menu-section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
+.user-menu-panel .menu-section-label{margin-top:16px;}
+.user-menu-panel .menu-section-label:first-child{margin-top:0;}
+
+.invite-code-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
+.invite-code-row code{
+  font-family:'SFMono-Regular',Menlo,Consolas,monospace;
+  font-size:15px;letter-spacing:2px;font-weight:600;
+  background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:4px 10px;
+}
 
 .menu-item{
   display:flex;justify-content:space-between;align-items:center;

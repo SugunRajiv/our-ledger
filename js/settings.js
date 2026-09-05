@@ -32,12 +32,12 @@ document.getElementById('currency-select').addEventListener('change', (e) => {
   currencyCode = e.target.value;
   applyCurrencyToUI();
   render();
-  db.ref('currency').set(currencyCode).catch(err => alert('Could not save currency: ' + err.message));
+  householdRef().update({ currency: currencyCode }).catch(err => alert('Could not save currency: ' + err.message));
 });
 
 document.getElementById('language-select').addEventListener('change', (e) => {
   languageCode = e.target.value;
-  db.ref('language').set(languageCode).catch(err => alert('Could not save language: ' + err.message));
+  householdRef().update({ language: languageCode }).catch(err => alert('Could not save language: ' + err.message));
 });
 
 document.getElementById('budget-input').addEventListener('change', (e) => {
@@ -49,7 +49,7 @@ document.getElementById('budget-input').addEventListener('change', (e) => {
     return;
   }
   monthlyBudget = num;
-  db.ref('budget').set(num).catch(err => alert('Could not save budget: ' + err.message));
+  householdRef().update({ monthlyBudget: num }).catch(err => alert('Could not save budget: ' + err.message));
 });
 
 document.addEventListener('click', (e) => {
