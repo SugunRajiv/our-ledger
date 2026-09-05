@@ -140,6 +140,7 @@ h1{
   padding:4px 10px;
 }
 .invite-share-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;}
+.pending-tag{font-size:11px;color:var(--ochre);border:1px solid var(--ochre);border-radius:10px;padding:1px 7px;margin-left:4px;}
 
 .menu-item{
   display:flex;justify-content:space-between;align-items:center;

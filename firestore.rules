@@ -18,6 +18,20 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Maps a lowercased email to a pending invite: {householdId, invitedBy}.
+    // Doc ID is the email itself, so a user can only ever get() their OWN
+    // invite (via their verified auth token email) - never someone else's.
+    match /invites/{emailId} {
+      allow get: if request.auth != null && request.auth.token.email.lower() == emailId;
+      allow create: if request.auth != null
+        && request.auth.uid in get(/databases/$(database)/documents/households/$(request.resource.data.householdId)).data.memberUids;
+      allow delete: if request.auth != null && (
+        request.auth.token.email.lower() == emailId
+        || request.auth.uid in get(/databases/$(database)/documents/households/$(resource.data.householdId)).data.memberUids
+      );
+      allow update: if false;
+    }
+
     match /households/{householdId} {
       function isMember() {
         return request.auth != null && request.auth.uid in resource.data.memberUids;
@@ -37,6 +51,19 @@ service cloud.firestore {
           && request.auth.uid in request.resource.data.memberUids
           && request.resource.data.memberUids.size() == resource.data.memberUids.size() + 1
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids']);
+      }
+
+      // Accepting an email invite: a non-member may add themself (and clear
+      // their own pendingInvites entry) ONLY if a matching invites/{email}
+      // doc exists for their verified email and points at this household.
+      function isAcceptingInvite() {
+        return request.auth != null
+          && !(request.auth.uid in resource.data.memberUids)
+          && request.auth.uid in request.resource.data.memberUids
+          && request.resource.data.memberUids.size() == resource.data.memberUids.size() + 1
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'members', 'pendingInvites'])
+          && exists(/databases/$(database)/documents/invites/$(request.auth.token.email.lower()))
+          && get(/databases/$(database)/documents/invites/$(request.auth.token.email.lower())).data.householdId == householdId;
       }
 
       // Leaving (any member removes themself) or the owner removing someone
@@ -66,7 +93,7 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.memberUids == [request.auth.uid]
         && request.resource.data.ownerUid == request.auth.uid;
-      allow update: if isJoining() || isLeavingOrOwnerRemoving() || isRenamingMembers() || (isMember() && !touchesMembership());
+      allow update: if isJoining() || isAcceptingInvite() || isLeavingOrOwnerRemoving() || isRenamingMembers() || (isMember() && !touchesMembership());
       allow delete: if false;
 
       match /expenses/{entryId} {

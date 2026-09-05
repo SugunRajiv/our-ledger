@@ -116,6 +116,14 @@
         <button type="button" class="link-btn" id="copy-invite-link-btn">Copy link</button>
       </div>
 
+      <h3 style="margin-top:1.25rem;">Invite by email</h3>
+      <p class="hint" style="margin-top:0;">Only that exact email address can accept. They'll show as pending until they do.</p>
+      <div class="invite-code-row">
+        <input type="email" id="invite-email-input" placeholder="name@example.com" style="flex:1;">
+        <button type="button" class="link-btn" id="invite-email-btn">Send invite</button>
+      </div>
+      <div class="error" id="invite-email-error"></div>
+
       <h3 style="margin-top:1.25rem;">Members</h3>
       <div id="household-members-list"></div>
     </div>
