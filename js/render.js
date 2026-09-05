@@ -101,10 +101,25 @@ function render(){
   document.getElementById('top-save-month-total').textContent = fmt(saveMonthTotal);
   document.getElementById('top-save-week-total').textContent = fmt(saveWeekTotal);
 
+  const saveTotalLabelEl = document.getElementById('save-total-label');
+  if(savings.length > 0){
+    const earliestSaveDate = savings.reduce((min, e) => {
+      const d = new Date(e.date);
+      return d < min ? d : min;
+    }, new Date(savings[0].date));
+    saveTotalLabelEl.textContent = `Total saved (from ${earliestSaveDate.toLocaleDateString('en-IN', {month:'long'})})`;
+  } else {
+    saveTotalLabelEl.textContent = 'Total saved';
+  }
+
   renderTrendChart('savings-week-trend', currentWeekDailyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-weekly-donut', currentMonthWeeklyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-6month-trend', last6MonthsBuckets(savings), 'var(--teal)');
   renderColorBars('save-cat-breakdown', currentMonthCategoryTotals(savings));
+
+  const savePayTotals = {};
+  savings.forEach(e => { const t = e.type || 'Other'; savePayTotals[t] = (savePayTotals[t]||0) + e.amount; });
+  renderColorBars('save-pay-breakdown', Object.entries(savePayTotals).map(([label, value]) => ({ label, value })));
 
   const people = Array.from(new Set([...expenses.map(e=>e.who), ...savings.map(e=>e.who), 'Sugun', 'Sreelu']));
   const personBox = document.getElementById('person-breakdown');

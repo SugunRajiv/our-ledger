@@ -286,7 +286,7 @@
       <h2>Savings dashboard</h2>
       <div class="stats" style="margin-bottom:1rem;">
         <div class="stat">
-          <div class="label">Total saved</div>
+          <div class="label" id="save-total-label">Total saved</div>
           <div class="num" id="save-total">₹0</div>
         </div>
         <div class="stat">
@@ -306,6 +306,10 @@
         <div class="chart-block">
           <h3>Last 6 months</h3>
           <div id="savings-6month-trend"></div>
+        </div>
+        <div class="chart-block">
+          <h3>By payment type</h3>
+          <div id="save-pay-breakdown"><div class="empty">No entries yet.</div></div>
         </div>
         <div class="chart-block">
           <h3>Category-wise · this month</h3>
