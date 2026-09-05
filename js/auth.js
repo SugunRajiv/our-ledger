@@ -72,6 +72,7 @@ function attachListeners(){
     languageCode = data.language || 'en';
     householdMembers = data.members || {};
     document.getElementById('household-invite-code').textContent = data.inviteCode || '------';
+    updateInviteShareLinks(data.inviteCode);
 
     populateSelect('category', categories);
     renderManageList('manage-categories', categories, 'category');

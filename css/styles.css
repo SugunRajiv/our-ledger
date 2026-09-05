@@ -139,6 +139,7 @@ h1{
   background:var(--paper);border:1px solid var(--line);border-radius:6px;
   padding:4px 10px;
 }
+.invite-share-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;}
 
 .menu-item{
   display:flex;justify-content:space-between;align-items:center;

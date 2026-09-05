@@ -9,6 +9,33 @@ function memberDisplayName(user){
   return user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
 }
 
+// Pre-fill the join form if this page was opened via a shared invite link.
+const urlInviteCode = new URLSearchParams(location.search).get('invite');
+if(urlInviteCode){
+  document.getElementById('invite-code-input').value = urlInviteCode.trim().toUpperCase();
+}
+
+function inviteLinkFor(code){
+  return location.origin + location.pathname + '?invite=' + code;
+}
+
+function updateInviteShareLinks(code){
+  if(!code || code === '------') return;
+  const link = inviteLinkFor(code);
+  const message = `Join our household ledger on Our Ledger: ${link} (invite code: ${code})`;
+
+  document.getElementById('share-whatsapp-link').href = 'https://wa.me/?text=' + encodeURIComponent(message);
+  document.getElementById('share-email-link').href = 'mailto:?subject=' + encodeURIComponent('Join our household ledger')
+    + '&body=' + encodeURIComponent(message);
+  document.getElementById('copy-invite-link-btn').dataset.link = link;
+}
+
+document.getElementById('copy-invite-link-btn').addEventListener('click', () => {
+  const link = document.getElementById('copy-invite-link-btn').dataset.link;
+  if(!link) return;
+  navigator.clipboard.writeText(link).catch(() => {});
+});
+
 function renderWhoButtons(){
   const names = Object.values(householdMembers).map(m => m.displayName).filter(Boolean);
   if(names.length === 0) return;
@@ -112,6 +139,9 @@ function enterApp(householdId){
   document.getElementById('setup-view').style.display = 'none';
   document.getElementById('app-view').style.display = 'block';
   attachListeners();
+  if(location.search.includes('invite=')){
+    history.replaceState(null, '', location.pathname);
+  }
 }
 
 document.getElementById('create-household-btn').addEventListener('click', async () => {
