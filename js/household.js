@@ -19,14 +19,15 @@ function inviteLinkFor(code){
   return location.origin + location.pathname + '?invite=' + code;
 }
 
+let currentInviteMessage = '';
+
 function updateInviteShareLinks(code){
   if(!code || code === '------') return;
   const link = inviteLinkFor(code);
-  const message = `Join our household ledger on Our Ledger: ${link} (invite code: ${code})`;
+  currentInviteMessage = `Join our household ledger on Our Ledger: ${link} (invite code: ${code})`;
 
-  document.getElementById('share-whatsapp-link').href = 'https://wa.me/?text=' + encodeURIComponent(message);
   document.getElementById('share-email-link').href = 'mailto:?subject=' + encodeURIComponent('Join our household ledger')
-    + '&body=' + encodeURIComponent(message);
+    + '&body=' + encodeURIComponent(currentInviteMessage);
   document.getElementById('copy-invite-link-btn').dataset.link = link;
 }
 
@@ -34,6 +35,20 @@ document.getElementById('copy-invite-link-btn').addEventListener('click', () => 
   const link = document.getElementById('copy-invite-link-btn').dataset.link;
   if(!link) return;
   navigator.clipboard.writeText(link).catch(() => {});
+});
+
+document.getElementById('send-whatsapp-btn').addEventListener('click', () => {
+  const input = document.getElementById('whatsapp-number-input');
+  const digits = input.value.replace(/[^0-9]/g, '');
+  if(!digits){
+    alert('Enter a WhatsApp number, including country code.');
+    return;
+  }
+  if(!currentInviteMessage){
+    alert('No invite link available yet - try again in a moment.');
+    return;
+  }
+  window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(currentInviteMessage), '_blank', 'noopener');
 });
 
 function renderWhoButtons(){
