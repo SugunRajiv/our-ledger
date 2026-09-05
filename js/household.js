@@ -19,16 +19,17 @@ function inviteLinkFor(code){
   return location.origin + location.pathname + '?invite=' + code;
 }
 
-let currentInviteMessage = '';
-
 function updateInviteShareLinks(code){
   if(!code || code === '------') return;
-  const link = inviteLinkFor(code);
-  currentInviteMessage = `Join our household ledger on Our Ledger: ${link} (invite code: ${code})`;
+  document.getElementById('copy-invite-link-btn').dataset.link = inviteLinkFor(code);
+}
 
-  document.getElementById('share-email-link').href = 'mailto:?subject=' + encodeURIComponent('Join our household ledger')
-    + '&body=' + encodeURIComponent(currentInviteMessage);
-  document.getElementById('copy-invite-link-btn').dataset.link = link;
+// Combines whatever the user has typed into the message box with the fixed
+// invite link, which is always appended and never itself editable.
+function buildInviteMessage(){
+  const link = document.getElementById('copy-invite-link-btn').dataset.link;
+  const custom = document.getElementById('invite-message-input').value.trim();
+  return (custom ? custom + '\n\n' : '') + link;
 }
 
 document.getElementById('copy-invite-link-btn').addEventListener('click', () => {
@@ -38,17 +39,31 @@ document.getElementById('copy-invite-link-btn').addEventListener('click', () => 
 });
 
 document.getElementById('send-whatsapp-btn').addEventListener('click', () => {
-  const input = document.getElementById('whatsapp-number-input');
-  const digits = input.value.replace(/[^0-9]/g, '');
+  const digits = document.getElementById('whatsapp-number-input').value.replace(/[^0-9]/g, '');
   if(!digits){
     alert('Enter a WhatsApp number, including country code.');
     return;
   }
-  if(!currentInviteMessage){
+  if(!document.getElementById('copy-invite-link-btn').dataset.link){
     alert('No invite link available yet - try again in a moment.');
     return;
   }
-  window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(currentInviteMessage), '_blank', 'noopener');
+  window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(buildInviteMessage()), '_blank', 'noopener');
+});
+
+document.getElementById('send-email-btn').addEventListener('click', () => {
+  const email = document.getElementById('email-recipient-input').value.trim();
+  if(!email){
+    alert('Enter an email address to send to.');
+    return;
+  }
+  if(!document.getElementById('copy-invite-link-btn').dataset.link){
+    alert('No invite link available yet - try again in a moment.');
+    return;
+  }
+  location.href = 'mailto:' + encodeURIComponent(email)
+    + '?subject=' + encodeURIComponent('Join our household ledger')
+    + '&body=' + encodeURIComponent(buildInviteMessage());
 });
 
 function renderWhoButtons(){
