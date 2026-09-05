@@ -21,6 +21,16 @@ document.getElementById('categories-dialog').addEventListener('click', (e) => {
   if(e.target === dlg) dlg.close();
 });
 
+document.getElementById('open-backup-btn').addEventListener('click', () => {
+  document.getElementById('user-menu').open = false;
+  document.getElementById('backup-dialog').showModal();
+});
+document.getElementById('close-backup-dialog').addEventListener('click', () => document.getElementById('backup-dialog').close());
+document.getElementById('backup-dialog').addEventListener('click', (e) => {
+  const dlg = document.getElementById('backup-dialog');
+  if(e.target === dlg) dlg.close();
+});
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));

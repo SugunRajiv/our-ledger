@@ -82,6 +82,7 @@
         <div class="hint">Leave blank or 0 to turn off budget tracking.</div>
 
         <button type="button" class="menu-item" id="open-categories-btn">Categories &amp; payment types</button>
+        <button type="button" class="menu-item" id="open-backup-btn">Backup &amp; restore</button>
 
         <div class="divider"></div>
         <button class="submit secondary" id="logout-btn">Sign out</button>
@@ -120,6 +121,19 @@
           <button type="button" class="link-btn" id="add-paytype-btn">+ Add type</button>
         </div>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="backup-dialog">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>Backup &amp; restore</h2>
+        <button type="button" class="modal-close" id="close-backup-dialog" aria-label="Close">&times;</button>
+      </div>
+      <p class="sub" style="margin-bottom:1rem;">Download a full backup of your data, or restore from a previous backup. Restoring replaces everything currently in the ledger.</p>
+      <button class="submit secondary" id="backup-btn" style="width:auto;margin-top:0;padding:9px 16px;">Download backup (JSON)</button>
+      <label for="restore-input">Restore from backup file</label>
+      <input type="file" id="restore-input" accept="application/json">
     </div>
   </dialog>
 
@@ -324,13 +338,6 @@
       <div class="pager" id="entries-list-pager"></div>
     </div>
 
-    <div class="card span-2">
-      <h2>Backup &amp; restore</h2>
-      <p class="sub" style="margin-bottom:1rem;">Download a full backup of your data, or restore from a previous backup. Restoring replaces everything currently in the ledger.</p>
-      <button class="submit secondary" id="backup-btn" style="width:auto;margin-top:0;padding:9px 16px;">Download backup (JSON)</button>
-      <label for="restore-input">Restore from backup file</label>
-      <input type="file" id="restore-input" accept="application/json">
-    </div>
   </div>
   </div>
 
