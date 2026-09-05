@@ -123,16 +123,14 @@ h1{
   overflow-y:auto;
   z-index:20;
 }
+.hint{font-size:11px;color:var(--muted);margin-top:4px;}
 .user-menu-panel label{margin-top:12px;}
 .user-menu-panel label:first-of-type{margin-top:0;}
-.user-menu-panel .hint{font-size:11px;color:var(--muted);margin-top:4px;}
 .user-menu-panel .submit{margin-top:0;width:100%;}
 .user-menu-panel .divider{margin:16px 0 12px;}
 .user-menu-panel .menu-item{margin-top:14px;}
 
 .menu-section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
-.user-menu-panel .menu-section-label{margin-top:16px;}
-.user-menu-panel .menu-section-label:first-child{margin-top:0;}
 
 .invite-code-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
 .invite-code-row code{

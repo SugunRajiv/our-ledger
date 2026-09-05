@@ -11,6 +11,16 @@ document.getElementById('cancel-edit-save-btn').addEventListener('click', () => 
   dlg.addEventListener('click', (e) => { if(e.target === dlg) dlg.close(); });
 });
 
+document.getElementById('open-customise-btn').addEventListener('click', () => {
+  document.getElementById('user-menu').open = false;
+  document.getElementById('customise-dialog').showModal();
+});
+document.getElementById('close-customise-dialog').addEventListener('click', () => document.getElementById('customise-dialog').close());
+document.getElementById('customise-dialog').addEventListener('click', (e) => {
+  const dlg = document.getElementById('customise-dialog');
+  if(e.target === dlg) dlg.close();
+});
+
 document.getElementById('open-categories-btn').addEventListener('click', () => {
   document.getElementById('user-menu').open = false;
   document.getElementById('categories-dialog').showModal();

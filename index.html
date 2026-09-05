@@ -87,27 +87,7 @@
           <button type="button" class="link-btn" id="copy-invite-code-btn">Copy</button>
         </div>
 
-        <div class="menu-section-label">Customise</div>
-
-        <label for="currency-select">Currency</label>
-        <select id="currency-select">
-          <option value="INR">₹ INR — Indian Rupee</option>
-          <option value="USD">$ USD — US Dollar</option>
-          <option value="EUR">€ EUR — Euro</option>
-          <option value="GBP">£ GBP — British Pound</option>
-        </select>
-
-        <label for="language-select">Language</label>
-        <select id="language-select">
-          <option value="en">English</option>
-          <option value="hi">Hindi</option>
-          <option value="te">Telugu</option>
-        </select>
-
-        <label for="budget-input" id="budget-input-label">Monthly budget (₹)</label>
-        <input type="number" id="budget-input" inputmode="decimal" placeholder="0" min="0" step="0.01">
-        <div class="hint">Leave blank or 0 to turn off budget tracking.</div>
-
+        <button type="button" class="menu-item" id="open-customise-btn">Customise</button>
         <button type="button" class="menu-item" id="open-categories-btn">Categories &amp; payment types</button>
         <button type="button" class="menu-item" id="open-backup-btn">Backup &amp; restore</button>
 
@@ -124,6 +104,33 @@
     <button class="submit" type="button" id="open-expense-btn">+ Expense</button>
     <button class="submit secondary" type="button" id="open-savings-btn">+ Savings</button>
   </div>
+
+  <dialog class="modal" id="customise-dialog">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>Customise</h2>
+        <button type="button" class="modal-close" id="close-customise-dialog" aria-label="Close">&times;</button>
+      </div>
+      <label for="currency-select">Currency</label>
+      <select id="currency-select">
+        <option value="INR">₹ INR — Indian Rupee</option>
+        <option value="USD">$ USD — US Dollar</option>
+        <option value="EUR">€ EUR — Euro</option>
+        <option value="GBP">£ GBP — British Pound</option>
+      </select>
+
+      <label for="language-select">Language</label>
+      <select id="language-select">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="te">Telugu</option>
+      </select>
+
+      <label for="budget-input" id="budget-input-label">Monthly budget (₹)</label>
+      <input type="number" id="budget-input" inputmode="decimal" placeholder="0" min="0" step="0.01">
+      <div class="hint">Leave blank or 0 to turn off budget tracking.</div>
+    </div>
+  </dialog>
 
   <dialog class="modal" id="categories-dialog">
     <div class="modal-inner">
