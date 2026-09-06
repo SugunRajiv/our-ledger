@@ -28,7 +28,11 @@ function inviteLinkFor(code){
 
 function updateInviteShareLinks(code){
   if(!code || code === '------') return;
-  document.getElementById('copy-invite-link-btn').dataset.link = inviteLinkFor(code);
+  const link = inviteLinkFor(code);
+  document.getElementById('copy-invite-link-btn').dataset.link = link;
+  const linkEl = document.getElementById('invite-link-display');
+  linkEl.href = link;
+  linkEl.textContent = link;
 }
 
 function inviteMessage(){
@@ -36,32 +40,29 @@ function inviteMessage(){
 }
 
 document.getElementById('send-whatsapp-btn').addEventListener('click', () => {
-  if(!document.getElementById('copy-invite-link-btn').dataset.link){
-    alert('No invite link available yet - try again in a moment.');
+  const digits = document.getElementById('whatsapp-number-input').value.replace(/[^0-9]/g, '');
+  if(!digits){
+    alert('Enter a WhatsApp number, including country code.');
     return;
   }
-  const number = prompt('WhatsApp number to send the invite to (include country code):');
-  if(number === null) return;
-  const digits = number.replace(/[^0-9]/g, '');
-  if(!digits){
-    alert('Enter a valid WhatsApp number.');
+  if(!document.getElementById('copy-invite-link-btn').dataset.link){
+    alert('No invite link available yet - try again in a moment.');
     return;
   }
   window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(inviteMessage()), '_blank', 'noopener');
 });
 
 document.getElementById('send-email-btn').addEventListener('click', () => {
+  const email = document.getElementById('email-recipient-input').value.trim();
+  if(!email){
+    alert('Enter an email address to send to.');
+    return;
+  }
   if(!document.getElementById('copy-invite-link-btn').dataset.link){
     alert('No invite link available yet - try again in a moment.');
     return;
   }
-  const email = prompt('Email address to send the invite to:');
-  if(email === null) return;
-  if(!email.trim() || !email.includes('@')){
-    alert('Enter a valid email address.');
-    return;
-  }
-  location.href = 'mailto:' + encodeURIComponent(email.trim())
+  location.href = 'mailto:' + encodeURIComponent(email)
     + '?subject=' + encodeURIComponent('Join our household ledger')
     + '&body=' + encodeURIComponent(inviteMessage());
 });
@@ -69,7 +70,7 @@ document.getElementById('send-email-btn').addEventListener('click', () => {
 document.getElementById('copy-invite-link-btn').addEventListener('click', () => {
   const link = document.getElementById('copy-invite-link-btn').dataset.link;
   if(!link) return;
-  navigator.clipboard.writeText(link).then(() => alert('Invite link copied.')).catch(() => {});
+  navigator.clipboard.writeText(link).catch(() => {});
 });
 
 function renderWhoButtons(){
@@ -353,5 +354,4 @@ document.getElementById('copy-invite-code-btn').addEventListener('click', () => 
   const code = document.getElementById('household-invite-code').textContent;
   if(!code || code === '------') return;
   navigator.clipboard.writeText(code).catch(() => {});
-  alert('Invite code: ' + code + '\n\n(copied to clipboard)');
 });

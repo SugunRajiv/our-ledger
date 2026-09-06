@@ -116,13 +116,32 @@
         <button type="button" class="modal-close" id="close-household-dialog" aria-label="Close">&times;</button>
       </div>
       <h3>Invite</h3>
-      <div class="invite-actions">
-        <button type="button" class="menu-item" id="send-whatsapp-btn">Send invite via WhatsApp</button>
-        <button type="button" class="menu-item" id="send-email-btn">Send invite via Email</button>
-        <button type="button" class="menu-item" id="copy-invite-link-btn">Share the link</button>
-        <button type="button" class="menu-item" id="copy-invite-code-btn">Share the code manually</button>
+
+      <div class="hint" style="margin-top:0;">Share link</div>
+      <div class="invite-code-row">
+        <a href="#" id="invite-link-display" target="_blank" rel="noopener">------</a>
+        <button type="button" class="link-btn" id="copy-invite-link-btn">Copy</button>
       </div>
-      <code id="household-invite-code" style="display:none;">------</code>
+
+      <div class="hint" style="margin-top:14px;">Share code — send this to your household member to add to the household</div>
+      <div class="invite-code-row">
+        <code id="household-invite-code">------</code>
+        <button type="button" class="link-btn" id="copy-invite-code-btn">Copy</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <label for="whatsapp-number-input">Send invite via WhatsApp</label>
+      <div class="invite-code-row">
+        <input type="tel" id="whatsapp-number-input" placeholder="+91 98765 43210" style="flex:1;">
+        <button type="button" class="link-btn" id="send-whatsapp-btn">Send</button>
+      </div>
+
+      <label for="email-recipient-input">Send invite via Email</label>
+      <div class="invite-code-row">
+        <input type="email" id="email-recipient-input" placeholder="name@example.com" style="flex:1;">
+        <button type="button" class="link-btn" id="send-email-btn">Send</button>
+      </div>
 
       <h3 style="margin-top:1.25rem;">Invite by email (verified)</h3>
       <p class="hint" style="margin-top:0;">Only that exact email address can accept. They'll show as pending until they do.</p>
