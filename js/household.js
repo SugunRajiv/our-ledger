@@ -17,7 +17,6 @@ const urlInviteCode = new URLSearchParams(location.search).get('invite');
 if(urlInviteCode){
   document.getElementById('invite-code-input').value = urlInviteCode.trim().toUpperCase();
   document.getElementById('setup-card').classList.add('invited');
-  document.getElementById('setup-subtitle').textContent = "You've been invited to join a household — confirm below.";
   document.getElementById('join-household-btn').classList.remove('secondary');
   document.getElementById('create-household-btn').classList.add('secondary');
 }
@@ -99,9 +98,8 @@ function renderMembersList(data){
   const myUid = auth.currentUser.uid;
   const isOwner = data.ownerUid === myUid;
   const entries = Object.entries(data.members || {});
-  const pending = Object.keys(data.pendingInvites || {});
 
-  const memberRows = entries.map(([uid, m]) => {
+  container.innerHTML = entries.map(([uid, m]) => {
     const isMe = uid === myUid;
     const label = m.displayName + (uid === data.ownerUid ? ' (owner)' : '');
     let actions = '';
@@ -113,15 +111,6 @@ function renderMembersList(data){
     }
     return `<div class="manage-row"><div>${label}</div><div class="actions">${actions}</div></div>`;
   }).join('');
-
-  const pendingRows = pending.map(email => `
-    <div class="manage-row">
-      <div>${email} <span class="pending-tag">Pending</span></div>
-      <div class="actions"><button type="button" class="danger" data-action="cancel-invite" data-email="${email}">Cancel</button></div>
-    </div>
-  `).join('');
-
-  container.innerHTML = memberRows + pendingRows;
 
   container.querySelectorAll('[data-action="rename"]').forEach(btn => {
     btn.addEventListener('click', () => renameSelf(entries.find(([u]) => u === myUid)[1].displayName));
@@ -135,9 +124,6 @@ function renderMembersList(data){
       const name = data.members[uid] ? data.members[uid].displayName : 'this member';
       removeMember(uid, name);
     });
-  });
-  container.querySelectorAll('[data-action="cancel-invite"]').forEach(btn => {
-    btn.addEventListener('click', () => cancelPendingInvite(btn.dataset.email));
   });
 }
 
@@ -164,77 +150,6 @@ async function removeMember(uid, name){
     alert('Could not remove: ' + err.message);
   }
 }
-
-async function inviteMemberByEmail(rawEmail){
-  const email = rawEmail.trim().toLowerCase();
-  if(!email || !email.includes('@')) throw new Error('Enter a valid email address.');
-
-  const inviteDoc = await fs.collection('invites').doc(email).get();
-  if(inviteDoc.exists) throw new Error('That email already has a pending invite.');
-
-  const existingMember = Object.values(householdMembers).some(m => (m.email || '').toLowerCase() === email);
-  if(existingMember) throw new Error('That email is already a member of this household.');
-
-  await fs.collection('invites').doc(email).set({
-    householdId: currentHouseholdId,
-    invitedBy: auth.currentUser.uid,
-  });
-  // Emails contain dots, so a dotted string key like `pendingInvites.${email}`
-  // would be misread as multiple nested path segments - FieldPath treats the
-  // email as one literal segment regardless of dots inside it.
-  await householdRef().update(new firebase.firestore.FieldPath('pendingInvites', email), true);
-}
-
-async function cancelPendingInvite(email){
-  if(!confirm(`Cancel the invite to ${email}?`)) return;
-  try {
-    await fs.collection('invites').doc(email).delete();
-    await householdRef().update(new firebase.firestore.FieldPath('pendingInvites', email), firebase.firestore.FieldValue.delete());
-  } catch(err){
-    alert('Could not cancel invite: ' + err.message);
-  }
-}
-
-// If this signed-in user has a pending email invite, accept it automatically
-// instead of showing the create/join setup screen.
-async function tryAcceptPendingInvite(user){
-  if(!user.email) return false;
-  const email = user.email.toLowerCase();
-  const inviteDoc = await fs.collection('invites').doc(email).get();
-  if(!inviteDoc.exists) return false;
-
-  const { householdId } = inviteDoc.data();
-  const ref = fs.collection('households').doc(householdId);
-  const displayName = memberDisplayName(user);
-
-  await ref.update(
-    'memberUids', firebase.firestore.FieldValue.arrayUnion(user.uid),
-    new firebase.firestore.FieldPath('members', user.uid), { displayName, email: user.email || '' },
-    new firebase.firestore.FieldPath('pendingInvites', email), firebase.firestore.FieldValue.delete()
-  );
-  await fs.collection('users').doc(user.uid).set({ householdId, displayName, email: user.email || '' });
-  await fs.collection('invites').doc(email).delete();
-
-  enterApp(householdId);
-  return true;
-}
-
-document.getElementById('invite-email-btn').addEventListener('click', async () => {
-  const errorEl = document.getElementById('invite-email-error');
-  const input = document.getElementById('invite-email-input');
-  errorEl.style.display = 'none';
-  const btn = document.getElementById('invite-email-btn');
-  btn.disabled = true;
-  try {
-    await inviteMemberByEmail(input.value);
-    input.value = '';
-  } catch(err){
-    errorEl.textContent = err.message;
-    errorEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-  }
-});
 
 async function leaveHousehold(){
   if(!confirm('Leave this household? You will need an invite code to rejoin.')) return;

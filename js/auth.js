@@ -35,8 +35,6 @@ async function resolveHousehold(user){
       currentHouseholdId = userDoc.data().householdId;
       document.getElementById('app-view').style.display = 'block';
       attachListeners();
-    } else if(await tryAcceptPendingInvite(user)){
-      // enterApp() already ran inside tryAcceptPendingInvite.
     } else {
       document.getElementById('loading-banner').style.display = 'none';
       document.getElementById('setup-view').style.display = 'block';
