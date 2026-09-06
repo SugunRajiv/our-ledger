@@ -163,7 +163,7 @@ async function leaveHousehold(){
     await fs.collection('users').doc(user.uid).delete();
     currentHouseholdId = null;
     document.getElementById('household-dialog').close();
-    document.getElementById('app-view').style.display = 'none';
+    setAppViewVisible(false);
     resolveHousehold(user);
   } catch(err){
     alert('Could not leave household: ' + err.message);
@@ -173,7 +173,7 @@ async function leaveHousehold(){
 function enterApp(householdId){
   currentHouseholdId = householdId;
   document.getElementById('setup-view').style.display = 'none';
-  document.getElementById('app-view').style.display = 'block';
+  setAppViewVisible(true);
   attachListeners();
   if(location.search.includes('invite=')){
     history.replaceState(null, '', location.pathname);

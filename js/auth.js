@@ -19,21 +19,21 @@ function initFirebase(){
       resolveHousehold(user);
     } else {
       document.getElementById('setup-view').style.display = 'none';
-      document.getElementById('app-view').style.display = 'none';
+      setAppViewVisible(false);
     }
   });
 }
 
 async function resolveHousehold(user){
   document.getElementById('setup-view').style.display = 'none';
-  document.getElementById('app-view').style.display = 'none';
+  setAppViewVisible(false);
   document.getElementById('loading-banner').style.display = 'block';
 
   try {
     const userDoc = await fs.collection('users').doc(user.uid).get();
     if(userDoc.exists && userDoc.data().householdId){
       currentHouseholdId = userDoc.data().householdId;
-      document.getElementById('app-view').style.display = 'block';
+      setAppViewVisible(true);
       attachListeners();
     } else {
       document.getElementById('loading-banner').style.display = 'none';

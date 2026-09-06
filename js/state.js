@@ -1,3 +1,8 @@
+function setAppViewVisible(visible){
+  document.getElementById('app-view').style.display = visible ? 'block' : 'none';
+  document.getElementById('app-nav').style.display = visible ? 'flex' : 'none';
+}
+
 let expenses = [];
 let savings = [];
 let currentSaveWho = 'Sugun';
