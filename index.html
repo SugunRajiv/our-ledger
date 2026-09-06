@@ -87,13 +87,37 @@
     <details class="user-menu" id="user-menu">
       <summary aria-label="Account and settings">
         <span class="user-avatar" id="user-avatar">?</span>
-        <span class="user-name" id="user-name-label">Account</span>
+        <span class="user-text">
+          <span class="user-name" id="user-name-label">Account</span>
+          <span class="user-role" id="user-role-label">Member</span>
+        </span>
+        <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="user-menu-panel">
-        <button type="button" class="menu-item" id="open-household-btn">Household</button>
-        <button type="button" class="menu-item" id="open-customise-btn">Customise</button>
-        <button type="button" class="menu-item" id="open-categories-btn">Categories &amp; payment types</button>
-        <button type="button" class="menu-item" id="open-backup-btn">Backup &amp; restore</button>
+        <button type="button" class="menu-item" id="open-household-btn">
+          <span class="menu-item-main">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Household
+          </span>
+        </button>
+        <button type="button" class="menu-item" id="open-customise-btn">
+          <span class="menu-item-main">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            Customise
+          </span>
+        </button>
+        <button type="button" class="menu-item" id="open-categories-btn">
+          <span class="menu-item-main">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 0 0 9.59 3.17L4 3a1 1 0 0 0-1 1l.17 5.59a2 2 0 0 0 .66 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"/><line x1="7.5" y1="7.5" x2="7.51" y2="7.5"/></svg>
+            Categories &amp; payment types
+          </span>
+        </button>
+        <button type="button" class="menu-item" id="open-backup-btn">
+          <span class="menu-item-main">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            Backup &amp; restore
+          </span>
+        </button>
 
         <div class="divider"></div>
         <button class="submit secondary" id="logout-btn">Sign out</button>

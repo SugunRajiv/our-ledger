@@ -73,6 +73,7 @@ function attachListeners(){
     householdMembers = data.members || {};
     document.getElementById('household-invite-code').textContent = data.inviteCode || '------';
     updateInviteShareLinks(data.inviteCode);
+    document.getElementById('user-role-label').textContent = (data.ownerUid === auth.currentUser.uid) ? 'Owner' : 'Member';
 
     populateSelect('category', categories);
     renderManageList('manage-categories', categories, 'category');
