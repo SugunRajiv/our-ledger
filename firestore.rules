@@ -68,11 +68,13 @@ service cloud.firestore {
 
       // Leaving (any member removes themself) or the owner removing someone
       // else: memberUids/members shrink by exactly one member, nothing else
-      // changes, and the household never drops to zero members.
+      // changes. Dropping to zero members is allowed - the household just
+      // becomes permanently inaccessible (nobody is a member of it anymore),
+      // which is harmless and is exactly what "abandon this household"
+      // (e.g. created by mistake) needs to do.
       function isLeavingOrOwnerRemoving() {
         return request.auth != null
           && request.resource.data.memberUids.size() == resource.data.memberUids.size() - 1
-          && request.resource.data.memberUids.size() > 0
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'members'])
           && (
             (isMember() && !(request.auth.uid in request.resource.data.memberUids))
