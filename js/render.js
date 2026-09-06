@@ -116,6 +116,7 @@ function render(){
   renderTrendChart('savings-weekly-donut', currentMonthWeeklyBuckets(savings), 'var(--teal)');
   renderTrendChart('savings-6month-trend', last6MonthsBuckets(savings), 'var(--teal)');
   renderDonutChart('save-cat-breakdown', currentMonthCategoryTotals(savings));
+  renderDonutChart('save-person-month-breakdown', currentMonthPersonTotals(savings));
 
   const savePayTotals = {};
   savings.forEach(e => { const t = e.type || 'Other'; savePayTotals[t] = (savePayTotals[t]||0) + e.amount; });
@@ -156,6 +157,7 @@ function render(){
 
   renderTrendChart('expense-week-trend', currentWeekDailyBuckets(expenses), 'var(--ochre)');
   renderDonutChart('cat-breakdown', currentMonthCategoryTotals(expenses));
+  renderDonutChart('person-month-breakdown', currentMonthPersonTotals(expenses));
   renderTrendChart('expense-weekly-donut', currentMonthWeeklyBuckets(expenses), 'var(--ochre)');
   renderTrendChart('expense-6month-trend', last6MonthsBuckets(expenses), 'var(--ochre)');
 

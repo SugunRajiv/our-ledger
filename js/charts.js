@@ -73,6 +73,16 @@ function currentMonthCategoryTotals(entries){
   return Object.entries(totals).map(([label, value]) => ({ label, value }));
 }
 
+function currentMonthPersonTotals(entries){
+  const start = startOfMonth(new Date());
+  const totals = {};
+  entries.filter(e => new Date(e.date) >= start).forEach(e => {
+    const p = e.who || 'Other';
+    totals[p] = (totals[p] || 0) + e.amount;
+  });
+  return Object.entries(totals).map(([label, value]) => ({ label, value }));
+}
+
 function ensureChartTooltip(){
   let tt = document.getElementById('chart-tooltip');
   if(!tt){
