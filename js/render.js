@@ -253,6 +253,11 @@ function renderTable(){
   const tbody = document.getElementById('entries-table-body');
   const emptyEl = document.getElementById('table-empty');
 
+  const expenseCount = rows.filter(r => r.kind === 'expense').length;
+  const savingsCount = rows.filter(r => r.kind === 'savings').length;
+  document.getElementById('entries-count-summary').textContent =
+    `${expenseCount} expense${expenseCount === 1 ? '' : 's'} · ${savingsCount} saving${savingsCount === 1 ? '' : 's'}`;
+
   const colLabels = { date:'Date', kind:'Type', category:'Category', who:'Who', amount:'Amount' };
   document.querySelectorAll('#entries-table th[data-col]').forEach(th => {
     const col = th.dataset.col;

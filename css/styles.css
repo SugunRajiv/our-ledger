@@ -79,8 +79,12 @@ h1{
 .stat .label{font-size:12px;color:var(--muted);margin-bottom:6px;}
 .stat .num{font-family:'Lora',serif;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;}
 
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem;}
+.page-header .sub{margin-bottom:0;}
+
 .top-actions{display:flex;gap:10px;margin-bottom:1.5rem;}
 .top-actions button{width:auto;margin-top:0;padding:12px 22px;font-size:15px;flex:1;}
+.page-header .top-actions{margin-bottom:0;flex-shrink:0;}
 
 /* App nav: a bottom tab bar on phones, a left sidebar on wide screens. */
 .app-nav{
@@ -175,7 +179,7 @@ h1{
   .user-avatar{width:36px;height:36px;font-size:14px;}
   .user-text{display:flex;flex-direction:column;line-height:1.25;text-align:left;}
   .user-chevron{display:block;}
-  .user-menu-panel{left:0;right:auto;}
+  .user-menu-panel{left:-14px;right:auto;width:230px;}
 
   #app-view.wrap{margin-left:230px;margin-right:auto;}
 }
