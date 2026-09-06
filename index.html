@@ -60,19 +60,23 @@
 
 <div class="wrap" id="setup-view" style="display:none;">
   <h1>Our ledger</h1>
-  <p class="sub">Set up your household to get started.</p>
-  <div class="card">
-    <label for="household-name-input">Household name</label>
-    <input type="text" id="household-name-input" placeholder="e.g. The Basireddys">
-    <div class="error" id="create-household-error"></div>
-    <button class="submit" id="create-household-btn">Create household</button>
+  <p class="sub" id="setup-subtitle">Set up your household to get started.</p>
+  <div class="card" id="setup-card">
+    <div class="setup-section" data-section="create">
+      <label for="household-name-input">Household name</label>
+      <input type="text" id="household-name-input" placeholder="e.g. The Basireddys">
+      <div class="error" id="create-household-error"></div>
+      <button class="submit" id="create-household-btn">Create household</button>
+    </div>
 
     <div class="divider"><span>or</span></div>
 
-    <label for="invite-code-input">Invite code</label>
-    <input type="text" id="invite-code-input" placeholder="ABCD12" style="text-transform:uppercase;">
-    <div class="error" id="join-household-error"></div>
-    <button class="submit secondary" id="join-household-btn">Join household</button>
+    <div class="setup-section" data-section="join">
+      <label for="invite-code-input">Invite code</label>
+      <input type="text" id="invite-code-input" placeholder="ABCD12" style="text-transform:uppercase;">
+      <div class="error" id="join-household-error"></div>
+      <button class="submit secondary" id="join-household-btn">Join household</button>
+    </div>
 
     <button class="submit secondary" id="setup-logout-btn" style="margin-top:10px;">Sign out</button>
   </div>

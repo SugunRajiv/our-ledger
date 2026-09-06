@@ -199,6 +199,14 @@ dialog.modal .modal-close:hover{color:var(--ink);}
 }
 .card h2{font-size:16px;font-weight:600;margin:0 0 14px;font-family:'Inter',sans-serif;}
 
+#setup-card{display:flex;flex-direction:column;}
+#setup-card [data-section="create"]{order:1;}
+#setup-card > .divider{order:2;}
+#setup-card [data-section="join"]{order:3;}
+#setup-card #setup-logout-btn{order:4;}
+#setup-card.invited [data-section="join"]{order:1;}
+#setup-card.invited [data-section="create"]{order:3;}
+
 label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;margin-top:12px;}
 label:first-of-type{margin-top:0;}
 input, select, textarea{

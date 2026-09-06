@@ -9,10 +9,17 @@ function memberDisplayName(user){
   return user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
 }
 
-// Pre-fill the join form if this page was opened via a shared invite link.
+// If this page was opened via a shared invite link, prioritize joining:
+// pre-fill the code, make Join the prominent action (not Create - that's
+// what caused someone to accidentally create their own household instead
+// of joining the one they were invited to), and say so up front.
 const urlInviteCode = new URLSearchParams(location.search).get('invite');
 if(urlInviteCode){
   document.getElementById('invite-code-input').value = urlInviteCode.trim().toUpperCase();
+  document.getElementById('setup-card').classList.add('invited');
+  document.getElementById('setup-subtitle').textContent = "You've been invited to join a household — confirm below.";
+  document.getElementById('join-household-btn').classList.remove('secondary');
+  document.getElementById('create-household-btn').classList.add('secondary');
 }
 
 function inviteLinkFor(code){
