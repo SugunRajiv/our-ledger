@@ -141,7 +141,7 @@ h1{
   position:absolute;
   left:0;
   bottom:calc(100% + 8px);
-  background:var(--card);
+  background:var(--paper);
   border:1px solid var(--line);
   border-radius:8px;
   box-shadow:0 4px 16px rgba(35,38,43,0.14);
@@ -180,7 +180,7 @@ h1{
   .user-avatar{width:36px;height:36px;font-size:14px;}
   .user-text{display:flex;flex-direction:column;line-height:1.25;text-align:left;}
   .user-chevron{display:block;}
-  .user-menu-panel{left:-14px;right:auto;width:230px;}
+  .user-menu-panel{left:0;right:auto;width:100%;}
 
   #app-view.wrap{margin-left:230px;margin-right:auto;}
 }
@@ -207,7 +207,7 @@ h1{
   font-size:14px;color:var(--ink);
   cursor:pointer;font-family:inherit;text-align:left;
 }
-.menu-item:hover{background:var(--paper);color:var(--teal-dark);}
+.menu-item:hover{background:var(--card);color:var(--teal-dark);}
 .menu-item-main{display:flex;align-items:center;}
 .menu-icon{width:18px;height:18px;flex-shrink:0;margin-right:10px;color:var(--muted);}
 
