@@ -239,7 +239,13 @@ dialog.modal{
 }
 dialog.modal::backdrop{background:rgba(35,38,43,0.5);}
 dialog.modal .modal-inner{padding:20px;max-height:85vh;overflow-y:auto;}
-dialog.modal .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+dialog.modal .modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:-20px;z-index:5;
+  background:var(--card);
+  margin:-20px 0 4px;
+  padding:20px 0 4px;
+}
 dialog.modal .modal-header h2{margin:0;font-size:16px;font-weight:600;font-family:'Inter',sans-serif;}
 dialog.modal .modal-close{background:none;border:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:2px 6px;}
 dialog.modal .modal-close:hover{color:var(--ink);}
@@ -471,10 +477,11 @@ input:focus, select:focus, textarea:focus{outline:2px solid var(--teal);outline-
 .export-btn{margin-top:0 !important;width:auto !important;padding:9px 16px !important;margin-left:auto;}
 
 .table-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;}
-.table-wrap{overflow-x:auto;background:var(--card);}
+.table-wrap{overflow-x:auto;overflow-y:auto;max-height:60vh;background:var(--card);}
 .data-table{width:100%;border-collapse:collapse;font-size:13px;}
 .data-table th, .data-table td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
 .data-table thead th{
+  position:sticky;top:0;z-index:5;
   background:var(--paper);
   cursor:pointer;
   color:var(--muted);
