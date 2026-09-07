@@ -155,8 +155,9 @@ h1{
 .user-menu-panel label{margin-top:12px;}
 .user-menu-panel label:first-of-type{margin-top:0;}
 .user-menu-panel .submit{margin-top:0;width:100%;}
-.user-menu-panel .divider{margin:16px 0 12px;}
-.user-menu-panel .menu-item{margin-top:14px;}
+.user-menu-panel .divider{margin:8px 0;}
+.user-menu-panel .menu-item{margin-top:2px;}
+.user-menu-panel .menu-item:first-child{margin-top:0;}
 
 @media (min-width:860px){
   body{padding-bottom:0;}
@@ -199,15 +200,14 @@ h1{
 }
 
 .menu-item{
-  display:flex;justify-content:space-between;align-items:center;
+  display:flex;align-items:center;
   width:100%;
-  background:none;border:none;
-  padding:10px 2px;
+  background:none;border:none;border-radius:8px;
+  padding:9px 8px;
   font-size:14px;color:var(--ink);
   cursor:pointer;font-family:inherit;text-align:left;
 }
-.menu-item:hover{color:var(--teal-dark);}
-.menu-item::after{content:'›';color:var(--muted);font-size:18px;margin-left:8px;}
+.menu-item:hover{background:var(--paper);color:var(--teal-dark);}
 .menu-item-main{display:flex;align-items:center;}
 .menu-icon{width:18px;height:18px;flex-shrink:0;margin-right:10px;color:var(--muted);}
 
