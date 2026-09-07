@@ -85,7 +85,7 @@ function render(){
     const daysAgo = Math.floor((now - lastDate) / 86400000);
     if(weekEntries.length === 0){
       banner.className = 'banner';
-      banner.textContent = 'Nothing entered this week yet' + (daysAgo>0? (' — last entry ' + daysAgo + ' day' + (daysAgo>1?'s':'') + ' ago.') : '.');
+      banner.textContent = 'Nothing this week yet' + (daysAgo>0? (' — last entry ' + daysAgo + 'd ago.') : '.');
     } else {
       banner.className = 'banner ok';
       banner.textContent = weekEntries.length + ' entr' + (weekEntries.length>1?'ies':'y') + ' logged this week. Nice.';
