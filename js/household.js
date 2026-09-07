@@ -119,7 +119,7 @@ function renderMembersList(data){
     btn.addEventListener('click', () => renameSelf(entries.find(([u]) => u === myUid)[1].displayName));
   });
   container.querySelectorAll('[data-action="leave"]').forEach(btn => {
-    btn.addEventListener('click', () => leaveHousehold());
+    btn.addEventListener('click', () => leaveHousehold(isOwner && entries.length === 1));
   });
   container.querySelectorAll('[data-action="remove"]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -154,8 +154,11 @@ async function removeMember(uid, name){
   }
 }
 
-async function leaveHousehold(){
-  if(!confirm('Leave this household? You will need an invite code to rejoin.')) return;
+async function leaveHousehold(isSoleOwner){
+  const message = isSoleOwner
+    ? "You're the only member of this household, so leaving makes it permanently inaccessible - your expenses and savings entries will be lost. Download a backup first from Backup & restore if you want to keep them. This cannot be undone. Leave anyway?"
+    : 'Leave this household? You will need an invite code to rejoin.';
+  if(!confirm(message)) return;
   try {
     const user = auth.currentUser;
     detachListeners();
