@@ -105,7 +105,10 @@ function renderMembersList(data){
     let actions = '';
     if(isMe){
       actions += `<button type="button" data-action="rename">Rename</button>`;
-      if(!isOwner) actions += `<button type="button" class="danger" data-action="leave">Leave</button>`;
+      // Non-owners can always leave. An owner can only leave if they're the
+      // sole member - otherwise leaving would strand the household with no
+      // owner, which isn't a flow this app supports yet.
+      if(!isOwner || entries.length === 1) actions += `<button type="button" class="danger" data-action="leave">Leave</button>`;
     } else if(isOwner){
       actions += `<button type="button" class="danger" data-action="remove" data-uid="${uid}">Remove</button>`;
     }
